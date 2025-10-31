@@ -64,3 +64,5 @@ while not window:should_close() do
 
     window:end_drawing()
 end
+
+window:close()

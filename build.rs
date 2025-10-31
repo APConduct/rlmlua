@@ -290,6 +290,7 @@ fn generate_raylib_definitions() {
             "",
             "Get the scroll wheel position",
         ),
+        ("close", "nil", "", "Close the window"),
     ];
 
     let other_functions: Vec<(&str, &str, &str, &'static str)> = vec![];

@@ -239,6 +239,11 @@ function Window:get_mouse_button(button) end
 ---@return number
 function Window:get_mouse_wheel_move() end
 
+---Close the window
+---@param self Window
+---@return nil
+function Window:close() end
+
 ---Initialize window and OpenGL context
 ---@param width integer Window width
 ---@param height integer Window height
