@@ -17,7 +17,7 @@ struct LuaRaylib<'l> {
 impl<'l> LuaUserData for LuaRaylib<'l> {
     fn add_methods<'lua, M: LuaUserDataMethods<Self>>(methods: &mut M) {
         methods.add_method_mut("window_should_close", |_, this, ()| {
-            // Poll input events to ensure window state is up to date
+            // Poll input events to ensure we catch ESC key presses
             this.rl.poll_input_events();
             Ok(this.rl.window_should_close())
         });
@@ -54,6 +54,168 @@ impl<'l> LuaUserData for LuaRaylib<'l> {
 
             DRAW_HANDLE.with(|cell| cell.replace(None));
 
+            Ok(())
+        });
+
+        // Direct drawing API (begin/end style)
+        methods.add_method_mut("begin_drawing", |_, this, ()| {
+            // Store the draw handle in the struct
+            let d = this.rl.begin_drawing(&this.thread);
+            // SAFETY: We transmute the lifetime to static and store it in thread-local
+            let d_static: *mut RaylibDrawHandle<'static> =
+                unsafe { std::mem::transmute(Box::into_raw(Box::new(d))) };
+            DRAW_HANDLE.with(|cell| cell.replace(Some(d_static)));
+            Ok(())
+        });
+
+        methods.add_method_mut("end_drawing", |_, _this, ()| {
+            // Clean up the draw handle
+            DRAW_HANDLE.with(|cell| {
+                if let Some(d) = cell.replace(None) {
+                    unsafe {
+                        // Reconstruct the box and let it drop
+                        let _ = Box::from_raw(d);
+                    }
+                }
+            });
+            Ok(())
+        });
+
+        methods.add_method_mut("clear_background", |_, _this, color: LuaColor| {
+            DRAW_HANDLE.with(|cell| {
+                if let Some(d) = *cell.borrow() {
+                    unsafe {
+                        (*d).clear_background(<LuaColor as Into<Color>>::into(color));
+                    }
+                }
+            });
+            Ok(())
+        });
+
+        methods.add_method_mut(
+            "draw_text",
+            |_, _this, (text, x, y, size, color): (String, i32, i32, i32, LuaColor)| {
+                DRAW_HANDLE.with(|cell| {
+                    if let Some(d) = *cell.borrow() {
+                        unsafe {
+                            (*d).draw_text(
+                                &text,
+                                x,
+                                y,
+                                size,
+                                <LuaColor as Into<Color>>::into(color),
+                            );
+                        }
+                    }
+                });
+                Ok(())
+            },
+        );
+
+        methods.add_method_mut(
+            "draw_rectangle",
+            |_, _this, (x, y, width, height, color): (i32, i32, i32, i32, LuaColor)| {
+                DRAW_HANDLE.with(|cell| {
+                    if let Some(d) = *cell.borrow() {
+                        unsafe {
+                            (*d).draw_rectangle(
+                                x,
+                                y,
+                                width,
+                                height,
+                                <LuaColor as Into<Color>>::into(color),
+                            );
+                        }
+                    }
+                });
+                Ok(())
+            },
+        );
+
+        methods.add_method_mut(
+            "draw_circle",
+            |_, _this, (x, y, radius, color): (i32, i32, f32, LuaColor)| {
+                DRAW_HANDLE.with(|cell| {
+                    if let Some(d) = *cell.borrow() {
+                        unsafe {
+                            (*d).draw_circle(x, y, radius, <LuaColor as Into<Color>>::into(color));
+                        }
+                    }
+                });
+                Ok(())
+            },
+        );
+
+        methods.add_method_mut(
+            "draw_line",
+            |_, _this, (x1, y1, x2, y2, color): (i32, i32, i32, i32, LuaColor)| {
+                DRAW_HANDLE.with(|cell| {
+                    if let Some(d) = *cell.borrow() {
+                        unsafe {
+                            (*d).draw_line(x1, y1, x2, y2, <LuaColor as Into<Color>>::into(color));
+                        }
+                    }
+                });
+                Ok(())
+            },
+        );
+
+        methods.add_method_mut(
+            "draw_pixel",
+            |_, _this, (x, y, color): (i32, i32, LuaColor)| {
+                DRAW_HANDLE.with(|cell| {
+                    if let Some(d) = *cell.borrow() {
+                        unsafe {
+                            (*d).draw_pixel(x, y, <LuaColor as Into<Color>>::into(color));
+                        }
+                    }
+                });
+                Ok(())
+            },
+        );
+
+        methods.add_method_mut(
+            "draw_rectangle_lines",
+            |_, _this, (x, y, width, height, color): (i32, i32, i32, i32, LuaColor)| {
+                DRAW_HANDLE.with(|cell| {
+                    if let Some(d) = *cell.borrow() {
+                        unsafe {
+                            (*d).draw_rectangle_lines(
+                                x,
+                                y,
+                                width,
+                                height,
+                                <LuaColor as Into<Color>>::into(color),
+                            );
+                        }
+                    }
+                });
+                Ok(())
+            },
+        );
+
+        methods.add_method_mut(
+            "draw_circle_lines",
+            |_, _this, (x, y, radius, color): (i32, i32, f32, LuaColor)| {
+                DRAW_HANDLE.with(|cell| {
+                    if let Some(d) = *cell.borrow() {
+                        unsafe {
+                            (*d).draw_circle_lines(
+                                x,
+                                y,
+                                radius,
+                                <LuaColor as Into<Color>>::into(color),
+                            );
+                        }
+                    }
+                });
+                Ok(())
+            },
+        );
+
+        // Input polling
+        methods.add_method_mut("poll_input_events", |_, this, ()| {
+            this.rl.poll_input_events();
             Ok(())
         });
 
@@ -420,6 +582,15 @@ fn register_colors(lua: &Lua, exports: &LuaTable) -> LuaResult<()> {
             r: 255,
             g: 255,
             b: 255,
+            a: 255,
+        },
+    )?;
+    colors.set(
+        "RAYWHITE",
+        LuaColor {
+            r: 245,
+            g: 245,
+            b: 245,
             a: 255,
         },
     )?;

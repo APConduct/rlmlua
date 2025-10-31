@@ -1,6 +1,9 @@
 local rl = require("raylib")
 -- local helpers = require("rlmlua")
 
+-- Note: Input events are automatically polled once per frame when
+-- window_should_close() is called. This ensures responsive input handling
+-- without needing to manually call poll_input_events().
 
 local window = rl.init_window(800, 450, "rlmlua - Basic Window")
 window:set_target_fps(60)
