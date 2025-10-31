@@ -23,8 +23,8 @@ while not window:should_close() do
         current_fps = current_fps + mouse_wheel
         if current_fps < 0 then
             current_fps = 0
-            window:set_target_fps(current_fps)
         end
+        window:set_target_fps(current_fps)
     end
 
     delta_circle.x = delta_circle.x + window:get_frame_time() * 6.0 * speed
@@ -50,13 +50,13 @@ while not window:should_close() do
     window:draw_circle_v(frame_circle, circle_radius, rlc.BLUE)
     local fps_text = ""
     if current_fps <= 0 then
-        fps_text = string.format("FPS: unlimited (%i)", window:get_fps())
+        fps_text = string.format("FPS: unlimited (%i)", math.floor(window:get_fps()))
     else
-        fps_text = string.format("FPS: %i (target: %i)", current_fps, window:get_fps(), current_fps)
+        fps_text = string.format("FPS: %i (target: %i)", math.floor(window:get_fps()), math.floor(current_fps))
     end
 
     window:draw_text(fps_text, 10, 10, 20, rlc.DARKGRAY)
-    window:draw_text(string.format("Frame time: %02.02f ms", window:get_frame_time()), 10, 30, 20, rlc.DARKGRAY)
+    window:draw_text(string.format("Frame time: %02.02f ms", window:get_frame_time() * 1000), 10, 30, 20, rlc.DARKGRAY)
     window:draw_text("Use the scroll wheel to change the fps limit, r to reset", 10, 50, 20, rlc.DARKGRAY)
 
     window:draw_text("FUNC: x = x + window:get_frame_time() * speed", 10, 90, 20, rlc.RED)

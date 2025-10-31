@@ -54,11 +54,21 @@ mkdir -p "$INST_LUADIR/rlmlua"
 # Clean up any old versions first
 echo "Cleaning up old versions..."
 rm -f "$INST_LIBDIR/raylib_lua.so" "$INST_LIBDIR/raylib_lua.dylib" "$INST_LIBDIR/raylib_lua.dll"
+rm -f "$INST_LIBDIR/rlm_lua.so" "$INST_LIBDIR/rlm_lua.dylib" "$INST_LIBDIR/rlm_lua.dll"
 
 # Install C module
 echo "Installing C module..."
 cp target/release/librlmlua$DYNAM_EXT "$INST_LIBDIR/$INSTALL_NAME"
 chmod 755 "$INST_LIBDIR/$INSTALL_NAME"
+
+# Create symlink/copy for rlm_lua module (same library, different entry point)
+if [ "$DYNAM_EXT" = ".dylib" ]; then
+    cp "$INST_LIBDIR/$INSTALL_NAME" "$INST_LIBDIR/rlm_lua.so"
+elif [ "$DYNAM_EXT" = ".dll" ]; then
+    cp "$INST_LIBDIR/$INSTALL_NAME" "$INST_LIBDIR/rlm_lua.dll"
+else
+    cp "$INST_LIBDIR/$INSTALL_NAME" "$INST_LIBDIR/rlm_lua.so"
+fi
 
 # Install Lua modules
 echo "Installing Lua modules..."

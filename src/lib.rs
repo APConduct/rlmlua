@@ -283,6 +283,62 @@ impl<'l> LuaUserData for LuaRaylib<'l> {
             let mb = int_to_mouse_button(button);
             Ok(this.rl.is_mouse_button_up(mb))
         });
+
+        methods.add_method("get_mouse_wheel_move", |_, this, ()| {
+            Ok(this.rl.get_mouse_wheel_move())
+        });
+
+        // Drawing - circle with vector
+        methods.add_method_mut(
+            "draw_circle_v",
+            |lua, _this, (center, radius, color): (LuaValue, f32, LuaColor)| {
+                let (x, y) = match &center {
+                    LuaValue::Table(t) => {
+                        let x: f32 = t.get("x")?;
+                        let y: f32 = t.get("y")?;
+                        (x, y)
+                    }
+                    LuaValue::UserData(ud) => {
+                        // Try to get fields directly from the userdata
+                        let x: f32 = ud.get("x")?;
+                        let y: f32 = ud.get("y")?;
+                        (x, y)
+                    }
+                    _ => {
+                        return Err(LuaError::FromLuaConversionError {
+                            from: "value",
+                            to: "Vector2".to_string(),
+                            message: Some("Expected table {x, y} or Vector2 userdata".to_string()),
+                        });
+                    }
+                };
+                DRAW_HANDLE.with(|cell| {
+                    if let Some(d) = *cell.borrow() {
+                        unsafe {
+                            (*d).draw_circle(
+                                x as i32,
+                                y as i32,
+                                radius,
+                                <LuaColor as Into<Color>>::into(color),
+                            );
+                        }
+                    }
+                });
+                Ok(())
+            },
+        );
+
+        // Window management
+        methods.add_method("close", |_, _this, ()| {
+            // Window closes automatically when dropped, but we can provide this as a no-op
+            // for API compatibility
+            Ok(())
+        });
+
+        // Alias for window_should_close for convenience
+        methods.add_method_mut("should_close", |_, this, ()| {
+            Ok(this.rl.window_should_close())
+        });
     }
 }
 
@@ -856,7 +912,15 @@ pub struct LuaVector2 {
 impl<'l> LuaUserData for LuaVector2 {
     fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {
         fields.add_field_method_get("x", |_, this| Ok(this.x));
+        fields.add_field_method_set("x", |_, this, val| {
+            this.x = val;
+            Ok(())
+        });
         fields.add_field_method_get("y", |_, this| Ok(this.y));
+        fields.add_field_method_set("y", |_, this, val| {
+            this.y = val;
+            Ok(())
+        });
     }
 
     fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
