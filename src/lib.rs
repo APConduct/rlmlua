@@ -8,7 +8,7 @@ struct LuaRaylib {
 }
 
 impl LuaUserData for LuaRaylib {
-    fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
+    fn add_methods<'lua, M: LuaUserDataMethods<Self>>(methods: &mut M) {
         methods.add_method_mut("window_should_close", |_, this, ()| {
             Ok(this.rl.window_should_close())
         });
@@ -22,7 +22,158 @@ impl LuaUserData for LuaRaylib {
 
         methods.add_method_mut("get_frame_time", |_, this, ()| Ok(this.rl.get_frame_time()));
 
-        todo!()
+        methods.add_method_mut("get_time", |_, this, ()| Ok(this.rl.get_time()));
+
+        methods.add_method_mut("get_screen_width", |_, this, ()| {
+            Ok(this.rl.get_screen_width())
+        });
+
+        methods.add_method_mut("get_screen_height", |_, this, ()| {
+            Ok(this.rl.get_screen_height())
+        });
+
+        // =====================================================================
+        // Drawing Functions
+        // =====================================================================
+
+        methods.add_method_mut("begin_drawing", |_, this, ()| {
+            // In a full implementation, we'd need to store the draw handle
+            // and make drawing functions only available through it
+            Ok(())
+        });
+
+        // End drawing (swap buffers)
+        methods.add_method_mut("end_drawing", |_, this, ()| Ok(()));
+
+        // Clear background with color
+        methods.add_method_mut("clear_background", |_, this, color: LuaColor| {
+            let mut d = this.rl.begin_drawing(&this.thread);
+            d.clear_background(<LuaColor as Into<Color>>::into(color));
+            Ok(())
+        });
+
+        // Draw text using default font
+        methods.add_method_mut(
+            "draw_text",
+            |_, this, args: (String, i32, i32, i32, LuaColor)| {
+                let (text, x, y, size, color) = args;
+                let mut d = this.rl.begin_drawing(&this.thread);
+                d.draw_text(&text, x, y, size, <LuaColor as Into<Color>>::into(color));
+                Ok(())
+            },
+        );
+
+        // Draw filled rectangle
+        methods.add_method_mut(
+            "draw_rectangle",
+            |_, this, args: (i32, i32, i32, i32, LuaColor)| {
+                let (x, y, width, height, color) = args;
+                let mut d = this.rl.begin_drawing(&this.thread);
+                d.draw_rectangle(x, y, width, height, <LuaColor as Into<Color>>::into(color));
+                Ok(())
+            },
+        );
+
+        // Draw filled circle
+        methods.add_method_mut("draw_circle", |_, this, args: (i32, i32, f32, LuaColor)| {
+            let (x, y, radius, color) = args;
+            let mut d = this.rl.begin_drawing(&this.thread);
+            d.draw_circle(x, y, radius, <LuaColor as Into<Color>>::into(color));
+            Ok(())
+        });
+
+        // Draw line
+        methods.add_method_mut(
+            "draw_line",
+            |_, this, args: (i32, i32, i32, i32, LuaColor)| {
+                let (x1, y1, x2, y2, color) = args;
+                let mut d = this.rl.begin_drawing(&this.thread);
+                d.draw_line(x1, y1, x2, y2, <LuaColor as Into<Color>>::into(color));
+                Ok(())
+            },
+        );
+
+        // Draw single pixel
+        methods.add_method_mut("draw_pixel", |_, this, args: (i32, i32, LuaColor)| {
+            let (x, y, color) = args;
+            let mut d = this.rl.begin_drawing(&this.thread);
+            d.draw_pixel(x, y, <LuaColor as Into<Color>>::into(color));
+            Ok(())
+        });
+
+        // Draw rectangle outline
+        methods.add_method_mut(
+            "draw_rectangle_lines",
+            |_, this, args: (i32, i32, i32, i32, LuaColor)| {
+                let (x, y, width, height, color) = args;
+                let mut d = this.rl.begin_drawing(&this.thread);
+                d.draw_rectangle_lines(x, y, width, height, <LuaColor as Into<Color>>::into(color));
+                Ok(())
+            },
+        );
+
+        // Draw circle outline
+        methods.add_method_mut(
+            "draw_circle_lines",
+            |_, this, args: (i32, i32, f32, LuaColor)| {
+                let (x, y, radius, color) = args;
+                let mut d = this.rl.begin_drawing(&this.thread);
+                d.draw_circle_lines(x, y, radius, <LuaColor as Into<Color>>::into(color));
+                Ok(())
+            },
+        );
+
+        // Input - Keyboard
+        // =====================================================================
+
+        methods.add_method("is_key_pressed", |_, this, key: String| {
+            Ok(this.rl.is_key_pressed(str_to_key(&key)))
+        });
+
+        methods.add_method("is_key_down", |_, this, key: String| {
+            Ok(this.rl.is_key_down(str_to_key(&key)))
+        });
+
+        methods.add_method("is_key_released", |_, this, key: String| {
+            Ok(this.rl.is_key_released(str_to_key(&key)))
+        });
+
+        methods.add_method("is_key_up", |_, this, key: String| {
+            Ok(this.rl.is_key_up(str_to_key(&key)))
+        });
+
+        // =====================================================================
+        // Input - Mouse
+        // =====================================================================
+
+        methods.add_method("get_mouse_position", |_, this, ()| {
+            let pos = this.rl.get_mouse_position();
+            Ok((pos.x, pos.y))
+        });
+
+        methods.add_method("get_mouse_x", |_, this, ()| Ok(this.rl.get_mouse_x()));
+
+        methods.add_method("get_mouse_y", |_, this, ()| Ok(this.rl.get_mouse_y()));
+
+        methods.add_method("is_mouse_button_pressed", |_, this, button: i32| {
+            let mb = int_to_mouse_button(button);
+            Ok(this.rl.is_mouse_button_pressed(mb))
+        });
+
+        methods.add_method("is_mouse_button_down", |_, this, button: i32| {
+            let mb = int_to_mouse_button(button);
+            Ok(this.rl.is_mouse_button_down(mb))
+        });
+
+        methods.add_method("is_mouse_button_released", |_, this, button: i32| {
+            let mb = int_to_mouse_button(button);
+            Ok(this.rl.is_mouse_button_released(mb))
+        });
+
+        methods.add_method("is_mouse_button_up", |_, this, button: i32| {
+            let mb = int_to_mouse_button(button);
+            Ok(this.rl.is_mouse_button_up(mb))
+        });
     }
 }
 
@@ -40,7 +191,7 @@ impl From<LuaColor> for Color {
     }
 }
 
-impl FromLua for LuaColor {
+impl<'lua> FromLua for LuaColor {
     fn from_lua(value: LuaValue, _lua: &Lua) -> LuaResult<Self> {
         match value {
             LuaValue::Table(t) => Ok(LuaColor {
@@ -61,81 +212,403 @@ impl FromLua for LuaColor {
 pub fn str_to_key(s: &str) -> KeyboardKey {
     match s.to_uppercase().as_str() {
         "SPACE" => KeyboardKey::KEY_SPACE,
-        "ESCAPE" => KeyboardKey::KEY_ESCAPE,
-        "ENTER" => KeyboardKey::KEY_ENTER,
-        "W" => KeyboardKey::KEY_W,
-        "A" => KeyboardKey::KEY_A,
-        "S" => KeyboardKey::KEY_S,
-        "D" => KeyboardKey::KEY_D,
-        "UP" => KeyboardKey::KEY_UP,
-        "DOWN" => KeyboardKey::KEY_DOWN,
-        "LEFT" => KeyboardKey::KEY_LEFT,
-        "RIGHT" => KeyboardKey::KEY_RIGHT,
-        "BACKSPACE" => KeyboardKey::KEY_BACKSPACE,
+        "ESCAPE" | "ESC" => KeyboardKey::KEY_ESCAPE,
+        "ENTER" | "RETURN" => KeyboardKey::KEY_ENTER,
         "TAB" => KeyboardKey::KEY_TAB,
-        "Q" => KeyboardKey::KEY_Q,
-        // "W" => KeyboardKey::KEY_W,
+        "BACKSPACE" => KeyboardKey::KEY_BACKSPACE,
+        "INSERT" => KeyboardKey::KEY_INSERT,
+        "DELETE" => KeyboardKey::KEY_DELETE,
+        "RIGHT" => KeyboardKey::KEY_RIGHT,
+        "LEFT" => KeyboardKey::KEY_LEFT,
+        "DOWN" => KeyboardKey::KEY_DOWN,
+        "UP" => KeyboardKey::KEY_UP,
+        "PAGE_UP" => KeyboardKey::KEY_PAGE_UP,
+        "PAGE_DOWN" => KeyboardKey::KEY_PAGE_DOWN,
+        "HOME" => KeyboardKey::KEY_HOME,
+        "END" => KeyboardKey::KEY_END,
+
+        // Letters
+        "A" => KeyboardKey::KEY_A,
+        "B" => KeyboardKey::KEY_B,
+        "C" => KeyboardKey::KEY_C,
+        "D" => KeyboardKey::KEY_D,
         "E" => KeyboardKey::KEY_E,
-        "R" => KeyboardKey::KEY_R,
-        "T" => KeyboardKey::KEY_T,
-        "Y" => KeyboardKey::KEY_Y,
-        "U" => KeyboardKey::KEY_U,
-        "I" => KeyboardKey::KEY_I,
-        "O" => KeyboardKey::KEY_O,
-        "P" => KeyboardKey::KEY_P,
-        "LEFT_BRACKET" => KeyboardKey::KEY_LEFT_BRACKET,
-        "RIGHT_BRACKET" => KeyboardKey::KEY_RIGHT_BRACKET,
-        "BACKSLASH" => KeyboardKey::KEY_BACKSLASH,
         "F" => KeyboardKey::KEY_F,
         "G" => KeyboardKey::KEY_G,
         "H" => KeyboardKey::KEY_H,
+        "I" => KeyboardKey::KEY_I,
         "J" => KeyboardKey::KEY_J,
         "K" => KeyboardKey::KEY_K,
         "L" => KeyboardKey::KEY_L,
-        "SEMICOLON" => KeyboardKey::KEY_SEMICOLON,
-        "LEFT_SHIFT" => KeyboardKey::KEY_LEFT_SHIFT,
-        "Z" => KeyboardKey::KEY_Z,
-        "X" => KeyboardKey::KEY_X,
-        "C" => KeyboardKey::KEY_C,
-        "V" => KeyboardKey::KEY_V,
-        "B" => KeyboardKey::KEY_B,
-        "N" => KeyboardKey::KEY_N,
         "M" => KeyboardKey::KEY_M,
-        "COMMA" => KeyboardKey::KEY_COMMA,
-        "PERIOD" => KeyboardKey::KEY_PERIOD,
-        "SLASH" => KeyboardKey::KEY_SLASH,
+        "N" => KeyboardKey::KEY_N,
+        "O" => KeyboardKey::KEY_O,
+        "P" => KeyboardKey::KEY_P,
+        "Q" => KeyboardKey::KEY_Q,
+        "R" => KeyboardKey::KEY_R,
+        "S" => KeyboardKey::KEY_S,
+        "T" => KeyboardKey::KEY_T,
+        "U" => KeyboardKey::KEY_U,
+        "V" => KeyboardKey::KEY_V,
+        "W" => KeyboardKey::KEY_W,
+        "X" => KeyboardKey::KEY_X,
+        "Y" => KeyboardKey::KEY_Y,
+        "Z" => KeyboardKey::KEY_Z,
+
+        // Numbers
+        "0" => KeyboardKey::KEY_ZERO,
+        "1" => KeyboardKey::KEY_ONE,
+        "2" => KeyboardKey::KEY_TWO,
+        "3" => KeyboardKey::KEY_THREE,
+        "4" => KeyboardKey::KEY_FOUR,
+        "5" => KeyboardKey::KEY_FIVE,
+        "6" => KeyboardKey::KEY_SIX,
+        "7" => KeyboardKey::KEY_SEVEN,
+        "8" => KeyboardKey::KEY_EIGHT,
+        "9" => KeyboardKey::KEY_NINE,
+
+        // Function keys
+        "F1" => KeyboardKey::KEY_F1,
+        "F2" => KeyboardKey::KEY_F2,
+        "F3" => KeyboardKey::KEY_F3,
+        "F4" => KeyboardKey::KEY_F4,
+        "F5" => KeyboardKey::KEY_F5,
+        "F6" => KeyboardKey::KEY_F6,
+        "F7" => KeyboardKey::KEY_F7,
+        "F8" => KeyboardKey::KEY_F8,
+        "F9" => KeyboardKey::KEY_F9,
+        "F10" => KeyboardKey::KEY_F10,
+        "F11" => KeyboardKey::KEY_F11,
+        "F12" => KeyboardKey::KEY_F12,
+
+        // Modifiers
+        "SHIFT" | "LEFT_SHIFT" => KeyboardKey::KEY_LEFT_SHIFT,
         "RIGHT_SHIFT" => KeyboardKey::KEY_RIGHT_SHIFT,
-        "LEFT_CONTROL" => KeyboardKey::KEY_LEFT_CONTROL,
-        "LEFT_ALT" => KeyboardKey::KEY_LEFT_ALT,
-        "RIGHT_ALT" => KeyboardKey::KEY_RIGHT_ALT,
+        "CTRL" | "CONTROL" | "LEFT_CONTROL" => KeyboardKey::KEY_LEFT_CONTROL,
         "RIGHT_CONTROL" => KeyboardKey::KEY_RIGHT_CONTROL,
-        "LEFT_SUPER" => KeyboardKey::KEY_LEFT_SUPER,
-        "RIGHT_SUPER" => KeyboardKey::KEY_RIGHT_SUPER,
-        "MENU" => KeyboardKey::KEY_MENU,
-        "ONE" => KeyboardKey::KEY_ONE,
-        "TWO" => KeyboardKey::KEY_TWO,
-        "THREE" => KeyboardKey::KEY_THREE,
-        "FOUR" => KeyboardKey::KEY_FOUR,
-        "FIVE" => KeyboardKey::KEY_FIVE,
-        "SIX" => KeyboardKey::KEY_SIX,
-        "SEVEN" => KeyboardKey::KEY_SEVEN,
-        "EIGHT" => KeyboardKey::KEY_EIGHT,
-        "NINE" => KeyboardKey::KEY_NINE,
-        "ZERO" => KeyboardKey::KEY_ZERO,
-        "MINUS" => KeyboardKey::KEY_MINUS,
-        "EQUALS" => KeyboardKey::KEY_EQUAL,
-        "KP_EQUAL" => KeyboardKey::KEY_KP_EQUAL,
-        "KP_0" => KeyboardKey::KEY_KP_0,
-        "KP_1" => KeyboardKey::KEY_KP_1,
-        "KP_2" => KeyboardKey::KEY_KP_2,
-        "KP_3" => KeyboardKey::KEY_KP_3,
-        "KP_4" => KeyboardKey::KEY_KP_4,
-        "KP_5" => KeyboardKey::KEY_KP_5,
-        "KP_6" => KeyboardKey::KEY_KP_6,
-        "KP_7" => KeyboardKey::KEY_KP_7,
-        "KP_8" => KeyboardKey::KEY_KP_8,
-        "KP_9" => KeyboardKey::KEY_KP_9,
-        // TODO: FINISH ADDING KEYS
+        "ALT" | "LEFT_ALT" => KeyboardKey::KEY_LEFT_ALT,
+        "RIGHT_ALT" => KeyboardKey::KEY_RIGHT_ALT,
+
         _ => KeyboardKey::KEY_NULL,
     }
+}
+
+/// Convert integer to MouseButton enum
+pub fn int_to_mouse_button(button: i32) -> MouseButton {
+    match button {
+        0 => MouseButton::MOUSE_BUTTON_LEFT,
+        1 => MouseButton::MOUSE_BUTTON_RIGHT,
+        2 => MouseButton::MOUSE_BUTTON_MIDDLE,
+        3 => MouseButton::MOUSE_BUTTON_SIDE,
+        4 => MouseButton::MOUSE_BUTTON_EXTRA,
+        5 => MouseButton::MOUSE_BUTTON_FORWARD,
+        6 => MouseButton::MOUSE_BUTTON_BACK,
+        _ => MouseButton::MOUSE_BUTTON_LEFT,
+    }
+}
+
+// =============================================================================
+// Library Functions
+// =============================================================================
+
+/// Initialize window and OpenGL context
+fn init_window(_lua: &Lua, (width, height, title): (i32, i32, String)) -> LuaResult<LuaRaylib> {
+    let (rl, thread) = raylib::init().size(width, height).title(&title).build();
+
+    Ok(LuaRaylib { rl, thread })
+}
+
+/// Create color from RGBA values
+fn color(_lua: &Lua, (r, g, b, a): (u8, u8, u8, Option<u8>)) -> LuaResult<LuaColor> {
+    Ok(LuaColor {
+        r,
+        g,
+        b,
+        a: a.unwrap_or(255),
+    })
+}
+
+impl IntoLua for LuaColor {
+    fn into_lua(self, lua: &Lua) -> LuaResult<LuaValue> {
+        let table = lua.create_table()?;
+        table.set(1, self.r)?;
+        table.set(2, self.g)?;
+        table.set(3, self.b)?;
+        table.set(4, self.a)?;
+        Ok(LuaValue::Table(table))
+    }
+}
+
+/// Register color constants
+fn register_colors(lua: &Lua, exports: &LuaTable) -> LuaResult<()> {
+    let colors = lua.create_table()?;
+
+    // Basic colors
+    colors.set(
+        "WHITE",
+        LuaColor {
+            r: 255,
+            g: 255,
+            b: 255,
+            a: 255,
+        },
+    )?;
+    colors.set(
+        "BLACK",
+        LuaColor {
+            r: 0,
+            g: 0,
+            b: 0,
+            a: 255,
+        },
+    )?;
+    colors.set(
+        "BLANK",
+        LuaColor {
+            r: 0,
+            g: 0,
+            b: 0,
+            a: 0,
+        },
+    )?;
+
+    // Primary colors
+    colors.set(
+        "RED",
+        LuaColor {
+            r: 255,
+            g: 0,
+            b: 0,
+            a: 255,
+        },
+    )?;
+    colors.set(
+        "GREEN",
+        LuaColor {
+            r: 0,
+            g: 255,
+            b: 0,
+            a: 255,
+        },
+    )?;
+    colors.set(
+        "BLUE",
+        LuaColor {
+            r: 0,
+            g: 0,
+            b: 255,
+            a: 255,
+        },
+    )?;
+
+    // Secondary colors
+    colors.set(
+        "YELLOW",
+        LuaColor {
+            r: 255,
+            g: 255,
+            b: 0,
+            a: 255,
+        },
+    )?;
+    colors.set(
+        "MAGENTA",
+        LuaColor {
+            r: 255,
+            g: 0,
+            b: 255,
+            a: 255,
+        },
+    )?;
+    colors.set(
+        "CYAN",
+        LuaColor {
+            r: 0,
+            g: 255,
+            b: 255,
+            a: 255,
+        },
+    )?;
+
+    // Grayscale
+    colors.set(
+        "DARKGRAY",
+        LuaColor {
+            r: 80,
+            g: 80,
+            b: 80,
+            a: 255,
+        },
+    )?;
+    colors.set(
+        "GRAY",
+        LuaColor {
+            r: 130,
+            g: 130,
+            b: 130,
+            a: 255,
+        },
+    )?;
+    colors.set(
+        "LIGHTGRAY",
+        LuaColor {
+            r: 200,
+            g: 200,
+            b: 200,
+            a: 255,
+        },
+    )?;
+
+    // Raylib special colors
+    colors.set(
+        "SKYBLUE",
+        LuaColor {
+            r: 102,
+            g: 191,
+            b: 255,
+            a: 255,
+        },
+    )?;
+    colors.set(
+        "ORANGE",
+        LuaColor {
+            r: 255,
+            g: 161,
+            b: 0,
+            a: 255,
+        },
+    )?;
+    colors.set(
+        "PURPLE",
+        LuaColor {
+            r: 200,
+            g: 122,
+            b: 255,
+            a: 255,
+        },
+    )?;
+    colors.set(
+        "PINK",
+        LuaColor {
+            r: 255,
+            g: 109,
+            b: 194,
+            a: 255,
+        },
+    )?;
+    colors.set(
+        "LIME",
+        LuaColor {
+            r: 0,
+            g: 228,
+            b: 48,
+            a: 255,
+        },
+    )?;
+    colors.set(
+        "GOLD",
+        LuaColor {
+            r: 255,
+            g: 203,
+            b: 0,
+            a: 255,
+        },
+    )?;
+    colors.set(
+        "BROWN",
+        LuaColor {
+            r: 127,
+            g: 106,
+            b: 79,
+            a: 255,
+        },
+    )?;
+    colors.set(
+        "DARKBROWN",
+        LuaColor {
+            r: 76,
+            g: 63,
+            b: 47,
+            a: 255,
+        },
+    )?;
+    colors.set(
+        "MAROON",
+        LuaColor {
+            r: 190,
+            g: 33,
+            b: 55,
+            a: 255,
+        },
+    )?;
+    colors.set(
+        "BEIGE",
+        LuaColor {
+            r: 211,
+            g: 176,
+            b: 131,
+            a: 255,
+        },
+    )?;
+    colors.set(
+        "DARKBLUE",
+        LuaColor {
+            r: 0,
+            g: 82,
+            b: 172,
+            a: 255,
+        },
+    )?;
+    colors.set(
+        "DARKGREEN",
+        LuaColor {
+            r: 0,
+            g: 117,
+            b: 44,
+            a: 255,
+        },
+    )?;
+    colors.set(
+        "DARKPURPLE",
+        LuaColor {
+            r: 112,
+            g: 31,
+            b: 126,
+            a: 255,
+        },
+    )?;
+    colors.set(
+        "VIOLET",
+        LuaColor {
+            r: 135,
+            g: 60,
+            b: 190,
+            a: 255,
+        },
+    )?;
+
+    exports.set("colors", colors)?;
+    Ok(())
+}
+
+// =============================================================================
+// Module Entry Point
+// =============================================================================
+
+#[mlua::lua_module]
+fn raylib_lua(lua: &Lua) -> LuaResult<LuaTable> {
+    let exports = lua.create_table()?;
+
+    // Core functions
+    exports.set("init_window", lua.create_function(init_window)?)?;
+    exports.set("color", lua.create_function(color)?)?;
+
+    // Register color constants
+    register_colors(lua, &exports)?;
+
+    // Version info
+    exports.set("_VERSION", "0.1.0")?;
+    exports.set("_DESCRIPTION", "Raylib bindings for Lua")?;
+
+    Ok(exports)
 }

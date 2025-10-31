@@ -4,9 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-raylib = "5.0"
-mlua = {version = "0.10.0", features = ["lua54", "vendored"]}
-fs = "0.0.5"
+raylib = "5.5.1"
+mlua = {version = "0.11", features = ["lua54", "module"]}
 
 [lib]
 name = "rlmlua"
