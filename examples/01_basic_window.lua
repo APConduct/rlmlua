@@ -2,7 +2,6 @@ local rl = require("raylib")
 -- local helpers = require("rlmlua")
 
 
-
 local window = rl.init_window(800, 450, "rlmua - Basic Window")
 window:set_target_fps(60)
 

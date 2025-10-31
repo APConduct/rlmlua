@@ -1,5 +1,11 @@
 use mlua::prelude::*;
 use raylib::prelude::*;
+use std::cell::RefCell;
+
+// Thread-local storage for the current draw handle
+thread_local! {
+    static DRAW_HANDLE: RefCell<Option<*mut RaylibDrawHandle<'static>>> = RefCell::new(None);
+}
 
 #[allow(dead_code)]
 struct LuaRaylib {
@@ -34,91 +40,19 @@ impl LuaUserData for LuaRaylib {
 
         // Drawing Functions
 
-        methods.add_method_mut("begin_drawing", |_, _this, ()| {
-            // TODO: store the draw handle
-            Ok(())
-        });
-
-        // End drawing (swap buffers)
-        methods.add_method_mut("end_drawing", |_, _this, ()| Ok(()));
-
-        // Clear background with color
-        methods.add_method_mut("clear_background", |_, this, color: LuaColor| {
+        methods.add_method_mut("draw_frame", |_, this, func: LuaFunction| {
             let mut d = this.rl.begin_drawing(&this.thread);
-            d.clear_background(<LuaColor as Into<Color>>::into(color));
+
+            // SAFETY: We guarantee the pointer is only valid for the duration of this frame
+            let d_static: *mut RaylibDrawHandle<'static> = unsafe { std::mem::transmute(&mut d) };
+            DRAW_HANDLE.with(|cell| cell.replace(Some(d_static)));
+
+            func.call::<()>(())?;
+
+            DRAW_HANDLE.with(|cell| cell.replace(None));
+
             Ok(())
         });
-
-        // Draw text using default font
-        methods.add_method_mut(
-            "draw_text",
-            |_, this, args: (String, i32, i32, i32, LuaColor)| {
-                let (text, x, y, size, color) = args;
-                let mut d = this.rl.begin_drawing(&this.thread);
-                d.draw_text(&text, x, y, size, <LuaColor as Into<Color>>::into(color));
-                Ok(())
-            },
-        );
-
-        // Draw filled rectangle
-        methods.add_method_mut(
-            "draw_rectangle",
-            |_, this, args: (i32, i32, i32, i32, LuaColor)| {
-                let (x, y, width, height, color) = args;
-                let mut d = this.rl.begin_drawing(&this.thread);
-                d.draw_rectangle(x, y, width, height, <LuaColor as Into<Color>>::into(color));
-                Ok(())
-            },
-        );
-
-        // Draw filled circle
-        methods.add_method_mut("draw_circle", |_, this, args: (i32, i32, f32, LuaColor)| {
-            let (x, y, radius, color) = args;
-            let mut d = this.rl.begin_drawing(&this.thread);
-            d.draw_circle(x, y, radius, <LuaColor as Into<Color>>::into(color));
-            Ok(())
-        });
-
-        // Draw line
-        methods.add_method_mut(
-            "draw_line",
-            |_, this, args: (i32, i32, i32, i32, LuaColor)| {
-                let (x1, y1, x2, y2, color) = args;
-                let mut d = this.rl.begin_drawing(&this.thread);
-                d.draw_line(x1, y1, x2, y2, <LuaColor as Into<Color>>::into(color));
-                Ok(())
-            },
-        );
-
-        // Draw single pixel
-        methods.add_method_mut("draw_pixel", |_, this, args: (i32, i32, LuaColor)| {
-            let (x, y, color) = args;
-            let mut d = this.rl.begin_drawing(&this.thread);
-            d.draw_pixel(x, y, <LuaColor as Into<Color>>::into(color));
-            Ok(())
-        });
-
-        // Draw rectangle outline
-        methods.add_method_mut(
-            "draw_rectangle_lines",
-            |_, this, args: (i32, i32, i32, i32, LuaColor)| {
-                let (x, y, width, height, color) = args;
-                let mut d = this.rl.begin_drawing(&this.thread);
-                d.draw_rectangle_lines(x, y, width, height, <LuaColor as Into<Color>>::into(color));
-                Ok(())
-            },
-        );
-
-        // Draw circle outline
-        methods.add_method_mut(
-            "draw_circle_lines",
-            |_, this, args: (i32, i32, f32, LuaColor)| {
-                let (x, y, radius, color) = args;
-                let mut d = this.rl.begin_drawing(&this.thread);
-                d.draw_circle_lines(x, y, radius, <LuaColor as Into<Color>>::into(color));
-                Ok(())
-            },
-        );
 
         // Input - Keyboard
 
@@ -168,6 +102,138 @@ impl LuaUserData for LuaRaylib {
             let mb = int_to_mouse_button(button);
             Ok(this.rl.is_mouse_button_up(mb))
         });
+    }
+}
+
+// Lua wrapper for RaylibDrawHandle
+struct LuaDrawHandle<'a> {
+    handle: &'a mut RaylibDrawHandle<'a>,
+}
+
+impl<'a> LuaUserData for LuaDrawHandle<'a> {
+    fn add_methods<'lua, M: LuaUserDataMethods<Self>>(methods: &mut M) {
+        // Register global drawing functions that use DRAW_HANDLE
+        methods.add_function("clear_background", |_, color: LuaColor| {
+            DRAW_HANDLE.with(|cell| {
+                if let Some(d) = *cell.borrow() {
+                    unsafe {
+                        (*d).clear_background(<LuaColor as Into<Color>>::into(color));
+                    }
+                }
+            });
+            Ok(())
+        });
+        methods.add_function(
+            "draw_text",
+            |_, (text, x, y, size, color): (String, i32, i32, i32, LuaColor)| {
+                DRAW_HANDLE.with(|cell| {
+                    if let Some(d) = *cell.borrow() {
+                        unsafe {
+                            (*d).draw_text(
+                                &text,
+                                x,
+                                y,
+                                size,
+                                <LuaColor as Into<Color>>::into(color),
+                            );
+                        }
+                    }
+                });
+                Ok(())
+            },
+        );
+        methods.add_function(
+            "draw_rectangle",
+            |_, (x, y, width, height, color): (i32, i32, i32, i32, LuaColor)| {
+                DRAW_HANDLE.with(|cell| {
+                    if let Some(d) = *cell.borrow() {
+                        unsafe {
+                            (*d).draw_rectangle(
+                                x,
+                                y,
+                                width,
+                                height,
+                                <LuaColor as Into<Color>>::into(color),
+                            );
+                        }
+                    }
+                });
+                Ok(())
+            },
+        );
+        methods.add_function(
+            "draw_circle",
+            |_, (x, y, radius, color): (i32, i32, f32, LuaColor)| {
+                DRAW_HANDLE.with(|cell| {
+                    if let Some(d) = *cell.borrow() {
+                        unsafe {
+                            (*d).draw_circle(x, y, radius, <LuaColor as Into<Color>>::into(color));
+                        }
+                    }
+                });
+                Ok(())
+            },
+        );
+        methods.add_function(
+            "draw_line",
+            |_, (x1, y1, x2, y2, color): (i32, i32, i32, i32, LuaColor)| {
+                DRAW_HANDLE.with(|cell| {
+                    if let Some(d) = *cell.borrow() {
+                        unsafe {
+                            (*d).draw_line(x1, y1, x2, y2, <LuaColor as Into<Color>>::into(color));
+                        }
+                    }
+                });
+                Ok(())
+            },
+        );
+        methods.add_function("draw_pixel", |_, (x, y, color): (i32, i32, LuaColor)| {
+            DRAW_HANDLE.with(|cell| {
+                if let Some(d) = *cell.borrow() {
+                    unsafe {
+                        (*d).draw_pixel(x, y, <LuaColor as Into<Color>>::into(color));
+                    }
+                }
+            });
+            Ok(())
+        });
+        methods.add_function(
+            "draw_rectangle_lines",
+            |_, (x, y, width, height, color): (i32, i32, i32, i32, LuaColor)| {
+                DRAW_HANDLE.with(|cell| {
+                    if let Some(d) = *cell.borrow() {
+                        unsafe {
+                            (*d).draw_rectangle_lines(
+                                x,
+                                y,
+                                width,
+                                height,
+                                <LuaColor as Into<Color>>::into(color),
+                            );
+                        }
+                    }
+                });
+                Ok(())
+            },
+        );
+        methods.add_function(
+            "draw_circle_lines",
+            |_, (x, y, radius, color): (i32, i32, f32, LuaColor)| {
+                DRAW_HANDLE.with(|cell| {
+                    if let Some(d) = *cell.borrow() {
+                        unsafe {
+                            (*d).draw_circle_lines(
+                                x,
+                                y,
+                                radius,
+                                <LuaColor as Into<Color>>::into(color),
+                            );
+                        }
+                    }
+                });
+                Ok(())
+            },
+        );
     }
 }
 
@@ -309,7 +375,11 @@ pub fn int_to_mouse_button(button: i32) -> MouseButton {
 fn init_window(_lua: &Lua, (width, height, title): (i32, i32, String)) -> LuaResult<LuaRaylib> {
     let (rl, thread) = raylib::init().size(width, height).title(&title).build();
 
-    Ok(LuaRaylib { rl, thread })
+    Ok(LuaRaylib {
+        rl,
+        thread,
+        // draw: None,
+    })
 }
 
 /// Create color from RGBA values
@@ -586,6 +656,7 @@ fn register_colors(lua: &Lua, exports: &LuaTable) -> LuaResult<()> {
 }
 
 // Module Entry Point
+// =============================================================================
 
 #[mlua::lua_module]
 fn raylib_lua(lua: &Lua) -> LuaResult<LuaTable> {
