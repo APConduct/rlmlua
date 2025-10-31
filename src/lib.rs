@@ -23,8 +23,6 @@ pub fn close_window() {
 impl<'l> LuaUserData for LuaRaylib<'l> {
     fn add_methods<'lua, M: LuaUserDataMethods<Self>>(methods: &mut M) {
         methods.add_method_mut("should_close", |_, this, ()| {
-            // Without custom_frame_control, EndDrawing() automatically polls events
-            // So WindowShouldClose() works correctly
             Ok(this.rl.window_should_close())
         });
 
@@ -849,6 +847,244 @@ fn register_colors(lua: &Lua, exports: &LuaTable) -> LuaResult<()> {
 // Module Entry Point
 // =============================================================================
 
+#[derive(Clone, Copy)]
+pub struct LuaVector2 {
+    pub x: f32,
+    pub y: f32,
+}
+
+impl<'l> LuaUserData for LuaVector2 {
+    fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {
+        fields.add_field_method_get("x", |_, this| Ok(this.x));
+        fields.add_field_method_get("y", |_, this| Ok(this.y));
+    }
+
+    fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
+        methods.add_method("__add", |_, this, other: LuaVector2| {
+            Ok(LuaVector2 {
+                x: this.x + other.x,
+                y: this.y + other.y,
+            })
+        });
+        methods.add_method("__sub", |_, this, other: LuaVector2| {
+            Ok(LuaVector2 {
+                x: this.x - other.x,
+                y: this.y - other.y,
+            })
+        });
+        methods.add_method("__mul", |_, this, other: LuaVector2| {
+            Ok(LuaVector2 {
+                x: this.x * other.x,
+                y: this.y * other.y,
+            })
+        });
+        methods.add_method("__div", |_, this, other: LuaVector2| {
+            Ok(LuaVector2 {
+                x: this.x / other.x,
+                y: this.y / other.y,
+            })
+        });
+        methods.add_method("__mod", |_, this, other: LuaVector2| {
+            Ok(LuaVector2 {
+                x: this.x % other.x,
+                y: this.y % other.y,
+            })
+        });
+        methods.add_method("__pow", |_, this, other: LuaVector2| {
+            Ok(LuaVector2 {
+                x: this.x.powf(other.x),
+                y: this.y.powf(other.y),
+            })
+        });
+        methods.add_method("__unm", |_, this, ()| {
+            Ok(LuaVector2 {
+                x: -this.x,
+                y: -this.y,
+            })
+        });
+        methods.add_method("__len", |_, this, ()| Ok(this.x.hypot(this.y)));
+        methods.add_method("__eq", |_, this, other: LuaVector2| {
+            Ok((this.x - other.x).abs() < f32::EPSILON && (this.y - other.y).abs() < f32::EPSILON)
+        });
+
+        methods.add_method("__lt", |_, this, other: LuaVector2| {
+            Ok(this.x < other.x && this.y < other.y)
+        });
+        methods.add_method("__le", |_, this, other: LuaVector2| {
+            Ok(this.x <= other.x && this.y <= other.y)
+        });
+        methods.add_method("__gt", |_, this, other: LuaVector2| {
+            Ok(this.x > other.x && this.y > other.y)
+        });
+        methods.add_method("__ge", |_, this, other: LuaVector2| {
+            Ok(this.x >= other.x && this.y >= other.y)
+        });
+        methods.add_method("__index", |_, this, key: String| match key.as_str() {
+            "x" => Ok(this.x),
+            "y" => Ok(this.y),
+            _ => Err(LuaError::runtime(format!(
+                "LuaVector2 has no field '{}'",
+                key
+            ))),
+        });
+    }
+}
+
+impl From<LuaVector2> for Vector2 {
+    fn from(value: LuaVector2) -> Self {
+        Vector2::new(value.x, value.y)
+    }
+}
+
+impl From<Vector2> for LuaVector2 {
+    fn from(value: Vector2) -> Self {
+        LuaVector2 {
+            x: value.x,
+            y: value.y,
+        }
+    }
+}
+
+impl<'lua> FromLua for LuaVector2 {
+    fn from_lua(value: LuaValue, _lua: &Lua) -> LuaResult<Self> {
+        match value {
+            LuaValue::Table(table) => {
+                let x = table.get("x")?;
+                let y = table.get("y")?;
+                Ok(LuaVector2 { x, y })
+            }
+            _ => Err(LuaError::FromLuaConversionError {
+                from: value.type_name(),
+                to: "LuaVector2".to_string(),
+                message: None,
+            }),
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct LuaVector3 {
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
+}
+
+impl From<LuaVector3> for Vector3 {
+    fn from(value: LuaVector3) -> Self {
+        Vector3::new(value.x, value.y, value.z)
+    }
+}
+
+impl From<Vector3> for LuaVector3 {
+    fn from(value: Vector3) -> Self {
+        LuaVector3 {
+            x: value.x,
+            y: value.y,
+            z: value.z,
+        }
+    }
+}
+
+impl<'l> LuaUserData for LuaVector3 {
+    fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {
+        fields.add_field_method_get("x", |_, this| Ok(this.x));
+        fields.add_field_method_get("y", |_, this| Ok(this.y));
+        fields.add_field_method_get("z", |_, this| Ok(this.z));
+    }
+    fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
+        methods.add_method("new", |_, _this, (x, y, z): (f32, f32, f32)| {
+            Ok(LuaVector3 { x, y, z })
+        });
+        methods.add_method("__add", |_, this, (x, y, z): (f32, f32, f32)| {
+            Ok(LuaVector3 {
+                x: this.x + x,
+                y: this.y + y,
+                z: this.z + z,
+            })
+        });
+        methods.add_method("__sub", |_, this, (x, y, z): (f32, f32, f32)| {
+            Ok(LuaVector3 {
+                x: this.x - x,
+                y: this.y - y,
+                z: this.z - z,
+            })
+        });
+        methods.add_method("__mul", |_, this, (x, y, z): (f32, f32, f32)| {
+            Ok(LuaVector3 {
+                x: this.x * x,
+                y: this.y * y,
+                z: this.z * z,
+            })
+        });
+        methods.add_method("__div", |_, this, (x, y, z): (f32, f32, f32)| {
+            Ok(LuaVector3 {
+                x: this.x / x,
+                y: this.y / y,
+                z: this.z / z,
+            })
+        });
+        methods.add_method("__mod", |_, this, (x, y, z): (f32, f32, f32)| {
+            Ok(LuaVector3 {
+                x: this.x % x,
+                y: this.y % y,
+                z: this.z % z,
+            })
+        });
+        methods.add_method("__pow", |_, this, (x, y, z): (f32, f32, f32)| {
+            Ok(LuaVector3 {
+                x: this.x.powf(x),
+                y: this.y.powf(y),
+                z: this.z.powf(z),
+            })
+        });
+        methods.add_method("__unm", |_, this, ()| {
+            Ok(LuaVector3 {
+                x: -this.x,
+                y: -this.y,
+                z: -this.z,
+            })
+        });
+        methods.add_method("__len", |_, this, ()| {
+            Ok(this.x.hypot(this.y).hypot(this.z))
+        });
+        methods.add_method("__eq", |_, this, other: LuaVector3| {
+            Ok(this.x == other.x && this.y == other.y && this.z == other.z)
+        });
+        methods.add_method("__index", |_, this, key: String| match key.as_str() {
+            "x" => Ok(this.x),
+            "y" => Ok(this.y),
+            "z" => Ok(this.z),
+            _ => Err(LuaError::FromLuaConversionError {
+                from: "Vector3",
+                to: key,
+                message: None,
+            }),
+        });
+    }
+}
+
+impl FromLua for LuaVector3 {
+    fn from_lua(value: LuaValue, _lua: &Lua) -> LuaResult<Self> {
+        match value {
+            LuaValue::Table(table) => {
+                let x: f32 = table.get("x")?;
+                let y: f32 = table.get("y")?;
+                let z: f32 = table.get("z")?;
+                Ok(LuaVector3 { x, y, z })
+            }
+            _ => Err(LuaError::FromLuaConversionError {
+                from: value.type_name(),
+                to: "LuaVector3".to_string(),
+                message: None,
+            }),
+        }
+    }
+}
+
+pub fn vector2<'lua>(_lua: &Lua, (x, y): (f32, f32)) -> LuaResult<LuaVector2> {
+    Ok(LuaVector2 { x, y })
+}
+
 #[mlua::lua_module]
 fn raylib_lua(lua: &Lua) -> LuaResult<LuaTable> {
     let exports = lua.create_table()?;
@@ -863,6 +1099,23 @@ fn raylib_lua(lua: &Lua) -> LuaResult<LuaTable> {
     // Version info
     exports.set("_VERSION", "0.1.0")?;
     exports.set("_DESCRIPTION", "Raylib bindings for Lua")?;
+
+    Ok(exports)
+}
+
+#[mlua::lua_module]
+fn rlm(lua: &Lua) -> LuaResult<LuaTable> {
+    let exports = lua.create_table()?;
+
+    // Vector2 functions
+    exports.set("vector2", lua.create_function(vector2)?)?;
+
+    // Version info
+    exports.set("_VERSION", "0.1.0")?;
+    exports.set(
+        "_DESCRIPTION",
+        "rlm-related functions and helpers for Raylib/rlmlua",
+    )?;
 
     Ok(exports)
 }
