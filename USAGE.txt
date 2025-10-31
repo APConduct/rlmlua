@@ -1,0 +1,58 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                    rlmlua - Quick Reference                      ║
+╚══════════════════════════════════════════════════════════════════╝
+
+INSTALLATION
+────────────
+  $ ./install_local.sh          # Install to ~/.luarocks/
+  $ lua -e "require('raylib')"  # Test installation
+  $ ./uninstall_local.sh        # Remove installation
+
+BASIC USAGE
+───────────
+  local rl = require("raylib")
+  local window = rl.init_window(800, 450, "Title")
+  window:set_target_fps(60)
+  
+  while not window:window_should_close() do
+      window:begin_drawing()
+      window:clear_background(rl.colors.SKYBLUE)
+      window:draw_text("Hello!", 250, 200, 30, rl.colors.BLACK)
+      window:end_drawing()
+  end
+
+DRAWING
+───────
+  window:draw_rectangle(x, y, w, h, color)
+  window:draw_circle(x, y, radius, color)
+  window:draw_line(x1, y1, x2, y2, color)
+  window:draw_text(text, x, y, size, color)
+  window:draw_pixel(x, y, color)
+
+INPUT
+─────
+  -- Keyboard
+  window:is_key_pressed("SPACE")  -- Just pressed
+  window:is_key_down("RIGHT")     -- Held down
+  
+  -- Mouse
+  local x, y = window:get_mouse_position()
+  window:is_mouse_button_pressed(0)  -- 0=left, 1=right
+
+COLORS
+──────
+  rl.colors.WHITE, BLACK, RED, GREEN, BLUE, YELLOW
+  rl.colors.SKYBLUE, PURPLE, ORANGE, RAYWHITE
+  rl.color(r, g, b, a)  -- Custom (0-255)
+
+EXAMPLES
+────────
+  $ lua examples/00_simple_after_install.lua
+  $ lua examples/01_basic_window.lua
+  $ lua examples/02_shapes_and_input.lua
+
+HELP
+────
+  README.md       - Full documentation
+  QUICK_START.md  - 5-minute guide
+  INSTALL.md      - Installation details

@@ -41,10 +41,12 @@ endif
 export CC
 export CXX
 
-.PHONY: all install clean
+.PHONY: all install clean run build
 
-all:
-	unset CC; unset CXX; cargo build --release
+build:
+	cargo build --release
+
+all: build
 	@if [ "$(DYNAM_EXTENSION)" = ".dylib" ]; then \
 		cp target/release/librlmlua.dylib target/release/libraylib_lua.so; \
 	elif [ "$(DYNAM_EXTENSION)" = ".dll" ]; then \
@@ -52,13 +54,39 @@ all:
 	else \
 		cp target/release/librlmlua.so target/release/libraylib_lua.so; \
 	fi
+	@ln -sf libraylib_lua.so target/release/raylib_lua.so
 
-install:
+run: all
+	LUA_PATH="./lua/?.lua;./lua/?/init.lua;;" LUA_CPATH="./target/release/?.so;;" lua examples/01_basic_window.lua
+
+install: all
+	@echo "Installing rlmlua to $(INST_LIBDIR) and $(INST_LUADIR)"
 	mkdir -p $(INST_LIBDIR)
 	mkdir -p $(INST_LUADIR)/raylib
-	cp target/release/librlmlua$(DYNAM_EXTENSION) $(INST_LIBDIR)/
-	cp lua/raylib/init.lua $(INST_LUADIR)/raylib/
-	# cp lua/raylib/helpers.lua $(INST_LUADIR)/raylib/
+	mkdir -p $(INST_LUADIR)/rlmlua
+	@# Install the C module (the compiled Rust library)
+	@if [ "$(DYNAM_EXTENSION)" = ".dylib" ]; then \
+		cp target/release/libraylib_lua.so $(INST_LIBDIR)/raylib_lua.so; \
+	elif [ "$(DYNAM_EXTENSION)" = ".dll" ]; then \
+		cp target/release/libraylib_lua.so $(INST_LIBDIR)/raylib_lua.dll; \
+	else \
+		cp target/release/libraylib_lua.so $(INST_LIBDIR)/raylib_lua.so; \
+	fi
+	@# Install the Lua wrapper modules
+	cp lua/raylib/init.lua $(INST_LUADIR)/raylib/init.lua
+	@# Install type definitions if they exist
+	@if [ -f lua/raylib/meta.lua ]; then \
+		cp lua/raylib/meta.lua $(INST_LUADIR)/raylib/meta.lua; \
+	fi
+	@# Install rlmlua helper module if it exists
+	@if [ -f lua/rlmlua/init.lua ]; then \
+		cp lua/rlmlua/init.lua $(INST_LUADIR)/rlmlua/init.lua; \
+	fi
+	@if [ -f lua/rlmlua/meta.lua ]; then \
+		cp lua/rlmlua/meta.lua $(INST_LUADIR)/rlmlua/meta.lua; \
+	fi
+	@echo "Installation complete!"
+	@echo "You can now use: require('raylib') in your Lua scripts"
 
 clean:
 	cargo clean

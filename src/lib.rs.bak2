@@ -768,16 +768,6 @@ fn register_colors(lua: &Lua, exports: &LuaTable) -> LuaResult<()> {
         },
     )?;
 
-    colors.set(
-        "RAYWHITE",
-        LuaColor {
-            r: 245,
-            g: 245,
-            b: 245,
-            a: 255,
-        },
-    )?;
-
     exports.set("colors", colors)?;
     Ok(())
 }

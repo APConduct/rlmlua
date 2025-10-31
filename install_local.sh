@@ -1,0 +1,115 @@
+#!/bin/bash
+# Simple local installation script for rlmlua
+# This installs to the local luarocks tree (~/.luarocks/)
+
+set -e
+
+echo "========================================"
+echo "Installing rlmlua locally"
+echo "========================================"
+echo ""
+
+# Detect OS
+OS_NAME=$(uname -s)
+if [ "$OS_NAME" = "Darwin" ]; then
+    DYNAM_EXT=".dylib"
+    LIB_NAME="libraylib_lua.so"
+elif [ "$OS_NAME" = "Linux" ]; then
+    DYNAM_EXT=".so"
+    LIB_NAME="libraylib_lua.so"
+else
+    DYNAM_EXT=".dll"
+    LIB_NAME="raylib_lua.dll"
+fi
+
+# Get Lua version
+LUA_VERSION=$(lua -e "print(string.match(_VERSION, '%d+%.%d+'))")
+echo "Detected Lua version: $LUA_VERSION"
+
+# Determine installation directories
+LUAROCKS_PREFIX="$HOME/.luarocks"
+INST_LIBDIR="$LUAROCKS_PREFIX/lib/lua/$LUA_VERSION"
+INST_LUADIR="$LUAROCKS_PREFIX/share/lua/$LUA_VERSION"
+
+echo "Installation directories:"
+echo "  C modules: $INST_LIBDIR"
+echo "  Lua modules: $INST_LUADIR"
+echo ""
+
+# Check if library is built
+if [ ! -f "target/release/librlmlua$DYNAM_EXT" ]; then
+    echo "Building the library..."
+    cargo build --release
+    echo ""
+fi
+
+# Copy library to proper format
+echo "Preparing library files..."
+if [ "$OS_NAME" = "Darwin" ]; then
+    cp target/release/librlmlua.dylib target/release/libraylib_lua.so
+elif [ "$OS_NAME" = "Linux" ]; then
+    cp target/release/librlmlua.so target/release/libraylib_lua.so
+else
+    cp target/release/librlmlua.dll target/release/libraylib_lua.dll
+fi
+
+# Create installation directories
+echo "Creating installation directories..."
+mkdir -p "$INST_LIBDIR"
+mkdir -p "$INST_LUADIR/raylib"
+mkdir -p "$INST_LUADIR/rlmlua"
+
+# Install C module
+echo "Installing C module..."
+cp target/release/$LIB_NAME "$INST_LIBDIR/raylib_lua.so"
+chmod 755 "$INST_LIBDIR/raylib_lua.so"
+
+# Install Lua modules
+echo "Installing Lua modules..."
+cp lua/raylib/init.lua "$INST_LUADIR/raylib/init.lua"
+if [ -f lua/raylib/meta.lua ]; then
+    cp lua/raylib/meta.lua "$INST_LUADIR/raylib/meta.lua"
+fi
+
+if [ -f lua/rlmlua/init.lua ]; then
+    cp lua/rlmlua/init.lua "$INST_LUADIR/rlmlua/init.lua"
+fi
+if [ -f lua/rlmlua/meta.lua ]; then
+    cp lua/rlmlua/meta.lua "$INST_LUADIR/rlmlua/meta.lua"
+fi
+
+echo ""
+echo "========================================"
+echo "Installation completed successfully!"
+echo "========================================"
+echo ""
+
+# Update shell environment
+echo "To use rlmlua, add this to your shell profile (~/.bashrc, ~/.zshrc, etc.):"
+echo ""
+echo "  eval \$(luarocks path --bin)"
+echo ""
+echo "Or for immediate use in this session:"
+echo ""
+echo "  eval \$(luarocks path --bin)"
+echo ""
+
+# Test the installation
+echo "Testing installation..."
+if lua -e "require('raylib'); print('✓ raylib module loaded successfully')" 2>/dev/null; then
+    echo "✓ Installation test passed!"
+else
+    echo "⚠ Module not loading yet. You may need to run:"
+    echo "  eval \$(luarocks path --bin)"
+    echo ""
+    echo "Then test again with:"
+    echo "  lua -e \"require('raylib'); print('Success!')\""
+fi
+
+echo ""
+echo "You can now use: require('raylib') in your Lua scripts"
+echo ""
+echo "Try running: lua examples/00_simple_after_install.lua"
+echo ""
+echo "To uninstall, run: ./uninstall_local.sh"
+echo ""
