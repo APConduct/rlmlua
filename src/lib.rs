@@ -585,9 +585,7 @@ fn register_colors(lua: &Lua, exports: &LuaTable) -> LuaResult<()> {
     Ok(())
 }
 
-// =============================================================================
 // Module Entry Point
-// =============================================================================
 
 #[mlua::lua_module]
 fn raylib_lua(lua: &Lua) -> LuaResult<LuaTable> {
