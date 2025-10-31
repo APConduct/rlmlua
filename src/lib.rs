@@ -288,10 +288,12 @@ impl<'l> LuaUserData for LuaRaylib<'l> {
             Ok(this.rl.get_mouse_wheel_move())
         });
 
-        // Drawing - circle with vector
+        // Dr
+        // 
+        // awing - circle with vector
         methods.add_method_mut(
             "draw_circle_v",
-            |lua, _this, (center, radius, color): (LuaValue, f32, LuaColor)| {
+            |_lua, _this, (center, radius, color): (LuaValue, f32, LuaColor)| {
                 let (x, y) = match &center {
                     LuaValue::Table(t) => {
                         let x: f32 = t.get("x")?;

@@ -369,6 +369,7 @@ fn generate_raylib_definitions() {
     output.push_str("---@field DARKBLUE Color Dark Blue (0, 0, 128, 255)\n");
     output.push_str("---@field LIME Color Lime (0, 255, 0, 255)\n");
     output.push_str("---@field GOLD Color Gold (255, 201, 0, 255)\n");
+    output.push_str("---@field MAROON Color Maroon (128, 0, 0, 255)\n");
     output.push_str("raylib.colors = {}\n\n");
 
     // Key constants documentation

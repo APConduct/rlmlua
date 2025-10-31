@@ -284,6 +284,7 @@ function raylib.draw(window, callback) end
 ---@field DARKBLUE Color Dark Blue (0, 0, 128, 255)
 ---@field LIME Color Lime (0, 255, 0, 255)
 ---@field GOLD Color Gold (255, 201, 0, 255)
+---@field MAROON Color Maroon (128, 0, 0, 255)
 raylib.colors = {}
 
 ---Key string constants for keyboard input
