@@ -255,6 +255,11 @@ impl<'l> LuaUserData for LuaRaylib<'l> {
             Ok((pos.x, pos.y))
         });
 
+        methods.add_method("get_mouse_wheel_move", |_, this, ()| {
+            let wheel = this.rl.get_mouse_wheel_move();
+            Ok(wheel)
+        });
+
         methods.add_method("get_mouse_x", |_, this, ()| Ok(this.rl.get_mouse_x()));
 
         methods.add_method("get_mouse_y", |_, this, ()| Ok(this.rl.get_mouse_y()));
