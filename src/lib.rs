@@ -16,7 +16,7 @@ struct LuaRaylib<'l> {
 
 impl<'l> LuaUserData for LuaRaylib<'l> {
     fn add_methods<'lua, M: LuaUserDataMethods<Self>>(methods: &mut M) {
-        methods.add_method_mut("window_should_close", |_, this, ()| {
+        methods.add_method_mut("should_close", |_, this, ()| {
             // Without custom_frame_control, EndDrawing() automatically polls events
             // So WindowShouldClose() works correctly
             Ok(this.rl.window_should_close())

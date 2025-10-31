@@ -17,7 +17,7 @@ local circle_radius = 32.0
 
 window:set_target_fps(current_fps)
 
-while not window:window_should_close() do
+while not window:should_close() do
     local mouse_wheel = window:get_mouse_wheel_move()
     if mouse_wheel ~= 0 then
         current_fps = current_fps + mouse_wheel

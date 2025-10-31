@@ -104,7 +104,7 @@ fn generate_raylib_definitions() {
     // Window methods with full documentation
     let window_methods = vec![
         (
-            "window_should_close",
+            "should_close",
             "boolean",
             "()",
             "Check if window close button or ESC was pressed",

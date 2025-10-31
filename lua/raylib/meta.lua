@@ -32,7 +32,7 @@ local Window = {}
 ---Check if window close button or ESC was pressed
 ---@param self Window
 ---@return boolean
-function Window:window_should_close() end
+function Window:should_close() end
 
 ---Set target FPS (maximum)
 ---@param self Window
