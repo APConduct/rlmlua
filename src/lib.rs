@@ -544,9 +544,7 @@ pub fn int_to_mouse_button(button: i32) -> MouseButton {
     }
 }
 
-// =============================================================================
 // Library Functions
-// =============================================================================
 
 /// Initialize window and OpenGL context
 fn init_window<'l>(
@@ -844,9 +842,6 @@ fn register_colors(lua: &Lua, exports: &LuaTable) -> LuaResult<()> {
     Ok(())
 }
 
-// Module Entry Point
-// =============================================================================
-
 #[derive(Clone, Copy)]
 pub struct LuaVector2 {
     pub x: f32,
@@ -1084,6 +1079,8 @@ impl FromLua for LuaVector3 {
 pub fn vector2<'lua>(_lua: &Lua, (x, y): (f32, f32)) -> LuaResult<LuaVector2> {
     Ok(LuaVector2 { x, y })
 }
+
+// Module Entry Point
 
 #[mlua::lua_module]
 fn raylib_lua(lua: &Lua) -> LuaResult<LuaTable> {
