@@ -1104,7 +1104,7 @@ fn raylib_lua(lua: &Lua) -> LuaResult<LuaTable> {
 }
 
 #[mlua::lua_module]
-fn rlm(lua: &Lua) -> LuaResult<LuaTable> {
+fn rlm_lua(lua: &Lua) -> LuaResult<LuaTable> {
     let exports = lua.create_table()?;
 
     // Vector2 functions
