@@ -1,0 +1,16 @@
+Options to fix the flickering:
+
+Option 1: Remove sleep entirely, rely on VSync
+- Pro: Background is stable
+- Con: Text might flicker
+- Con: FPS not limited
+
+Option 2: Only sleep if we're WAY ahead (e.g., more than 5ms early)
+- Pro: Won't interfere with VSync for normal rendering
+- Con: Might not limit FPS well enough
+
+Option 3: Use a much smaller sleep (like 1ms) just to yield CPU
+- Pro: Gives up CPU without blocking too long
+- Con: Might not be enough timing control
+
+Let's try Option 2 first - only sleep if we have significant time left

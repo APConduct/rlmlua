@@ -1,10 +1,15 @@
 use mlua::prelude::*;
 use raylib::prelude::*;
 use std::cell::RefCell;
+use std::thread;
+use std::time::Duration;
+use std::time::Instant;
 
 // Thread-local storage for the current draw handle
 thread_local! {
     static DRAW_HANDLE: RefCell<Option<*mut RaylibDrawHandle<'static>>> = RefCell::new(None);
+    static FRAME_START: RefCell<Option<Instant>> = RefCell::new(None);
+    static TARGET_FPS: RefCell<u32> = RefCell::new(60);
 }
 
 #[allow(dead_code)]
@@ -22,6 +27,7 @@ impl<'l> LuaUserData for LuaRaylib<'l> {
 
         methods.add_method_mut("set_target_fps", |_, this, fps: u32| {
             this.rl.set_target_fps(fps);
+            TARGET_FPS.with(|f| f.replace(fps));
             Ok(())
         });
 
@@ -54,6 +60,193 @@ impl<'l> LuaUserData for LuaRaylib<'l> {
 
             Ok(())
         });
+
+        // Imperative drawing API
+        methods.add_method_mut("begin_drawing", |_, this, ()| {
+            // Take the draw handle from begin_drawing and store it
+            let d = this.rl.begin_drawing(&this.thread);
+            // SAFETY: We transmute to 'static lifetime and store in thread-local
+            // This is safe because we guarantee it's only accessed during the drawing phase
+            let d_static: *mut RaylibDrawHandle<'static> =
+                unsafe { std::mem::transmute(Box::into_raw(Box::new(d))) };
+            DRAW_HANDLE.with(|cell| cell.replace(Some(d_static)));
+            // Record frame start time for FPS limiting
+            FRAME_START.with(|f| f.replace(Some(Instant::now())));
+            eprintln!("Frame start recorded");
+            Ok(())
+        });
+
+        methods.add_method_mut("end_drawing", |_, _this, ()| {
+            // Clean up the draw handle
+            DRAW_HANDLE.with(|cell| {
+                if let Some(d_ptr) = cell.replace(None) {
+                    unsafe {
+                        // Reconstruct the box and explicitly drop it
+                        // This ensures EndDrawing() is called synchronously
+                        let boxed_handle = Box::from_raw(d_ptr);
+                        std::mem::drop(boxed_handle);
+                    }
+                }
+            });
+
+            eprintln!("end_drawing: checking frame timing");
+
+
+            // Frame timing - wait to match target FPS
+            FRAME_START.with(|start_cell| {
+                if let Some(start_time) = *start_cell.borrow() {
+                    let elapsed = start_time.elapsed();
+                    let target_fps = TARGET_FPS.with(|f| *f.borrow());
+                    if target_fps > 0 {
+                        let target_frame_time = Duration::from_secs_f64(1.0 / target_fps as f64);
+                        eprintln!("Sleeping for {:?}", target_frame_time - elapsed);
+
+                        // Only sleep if we have more than 5ms to spare
+                        // This avoids interfering with VSync while still limiting runaway FPS
+                        if elapsed < target_frame_time {
+                            let remaining = target_frame_time - elapsed;
+                            if remaining > Duration::from_millis(5) {
+                                thread::sleep(remaining - Duration::from_millis(2));
+                            }
+                        }
+                    }
+                }
+            });
+
+            Ok(())
+        });
+
+        methods.add_method_mut("clear_background", |_, _this, color: LuaColor| {
+            DRAW_HANDLE.with(|cell| {
+                if let Some(d) = *cell.borrow() {
+                    unsafe {
+                        (*d).clear_background(<LuaColor as Into<Color>>::into(color));
+                    }
+                }
+            });
+            Ok(())
+        });
+
+        methods.add_method_mut(
+            "draw_text",
+            |_, _this, (text, x, y, size, color): (String, i32, i32, i32, LuaColor)| {
+                DRAW_HANDLE.with(|cell| {
+                    if let Some(d) = *cell.borrow() {
+                        unsafe {
+                            (*d).draw_text(
+                                &text,
+                                x,
+                                y,
+                                size,
+                                <LuaColor as Into<Color>>::into(color),
+                            );
+                        }
+                    }
+                });
+                Ok(())
+            },
+        );
+
+        methods.add_method_mut(
+            "draw_rectangle",
+            |_, _this, (x, y, width, height, color): (i32, i32, i32, i32, LuaColor)| {
+                DRAW_HANDLE.with(|cell| {
+                    if let Some(d) = *cell.borrow() {
+                        unsafe {
+                            (*d).draw_rectangle(
+                                x,
+                                y,
+                                width,
+                                height,
+                                <LuaColor as Into<Color>>::into(color),
+                            );
+                        }
+                    }
+                });
+                Ok(())
+            },
+        );
+
+        methods.add_method_mut(
+            "draw_circle",
+            |_, _this, (x, y, radius, color): (i32, i32, f32, LuaColor)| {
+                DRAW_HANDLE.with(|cell| {
+                    if let Some(d) = *cell.borrow() {
+                        unsafe {
+                            (*d).draw_circle(x, y, radius, <LuaColor as Into<Color>>::into(color));
+                        }
+                    }
+                });
+                Ok(())
+            },
+        );
+
+        methods.add_method_mut(
+            "draw_line",
+            |_, _this, (x1, y1, x2, y2, color): (i32, i32, i32, i32, LuaColor)| {
+                DRAW_HANDLE.with(|cell| {
+                    if let Some(d) = *cell.borrow() {
+                        unsafe {
+                            (*d).draw_line(x1, y1, x2, y2, <LuaColor as Into<Color>>::into(color));
+                        }
+                    }
+                });
+                Ok(())
+            },
+        );
+
+        methods.add_method_mut(
+            "draw_pixel",
+            |_, _this, (x, y, color): (i32, i32, LuaColor)| {
+                DRAW_HANDLE.with(|cell| {
+                    if let Some(d) = *cell.borrow() {
+                        unsafe {
+                            (*d).draw_pixel(x, y, <LuaColor as Into<Color>>::into(color));
+                        }
+                    }
+                });
+                Ok(())
+            },
+        );
+
+        methods.add_method_mut(
+            "draw_rectangle_lines",
+            |_, _this, (x, y, width, height, color): (i32, i32, i32, i32, LuaColor)| {
+                DRAW_HANDLE.with(|cell| {
+                    if let Some(d) = *cell.borrow() {
+                        unsafe {
+                            (*d).draw_rectangle_lines(
+                                x,
+                                y,
+                                width,
+                                height,
+                                <LuaColor as Into<Color>>::into(color),
+                            );
+                        }
+                    }
+                });
+                Ok(())
+            },
+        );
+
+        methods.add_method_mut(
+            "draw_circle_lines",
+            |_, _this, (x, y, radius, color): (i32, i32, f32, LuaColor)| {
+                DRAW_HANDLE.with(|cell| {
+                    if let Some(d) = *cell.borrow() {
+                        unsafe {
+                            (*d).draw_circle_lines(
+                                x,
+                                y,
+                                radius,
+                                <LuaColor as Into<Color>>::into(color),
+                            );
+                        }
+                    }
+                });
+                Ok(())
+            },
+        );
 
         // Input - Keyboard
 
@@ -651,6 +844,16 @@ fn register_colors(lua: &Lua, exports: &LuaTable) -> LuaResult<()> {
             r: 135,
             g: 60,
             b: 190,
+            a: 255,
+        },
+    )?;
+
+    colors.set(
+        "RAYWHITE",
+        LuaColor {
+            r: 245,
+            g: 245,
+            b: 245,
             a: 255,
         },
     )?;

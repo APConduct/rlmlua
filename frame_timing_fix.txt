@@ -1,0 +1,8 @@
+The issue: raylib-rs's RaylibDrawHandle Drop doesn't enforce frame timing.
+
+Solution: Add manual frame timing in Rust using std::thread::sleep
+
+Steps:
+1. Add thread_local for target_fps and last_frame_time
+2. Store target FPS when set_target_fps is called  
+3. In end_drawing, calculate elapsed time and sleep if needed

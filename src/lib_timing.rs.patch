@@ -1,0 +1,8 @@
+We need to add manual frame timing since raylib's automatic timing isn't working.
+The solution is to track frame time and manually sleep in end_drawing.
+
+Add these fields to LuaRaylib:
+- last_frame_time: f64
+- target_frame_time: f64
+
+And in end_drawing, calculate elapsed time and sleep if needed.

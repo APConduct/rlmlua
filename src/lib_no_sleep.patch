@@ -1,0 +1,2 @@
+Simply comment out or remove the entire frame timing section in end_drawing
+Keep the DRAW_HANDLE cleanup but skip the FRAME_START sleep logic

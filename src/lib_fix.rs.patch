@@ -1,0 +1,24 @@
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -69,6 +69,9 @@ impl<'l> LuaUserData for LuaRaylib<'l> {
+         methods.add_method_mut("end_drawing", |_, this, ()| {
+             // Clean up the draw handle
+             DRAW_HANDLE.with(|cell| {
+                 if let Some(d_ptr) = cell.replace(None) {
+                     unsafe {
+                         // Reconstruct the box and explicitly drop it
+@@ -77,6 +80,12 @@ impl<'l> LuaUserData for LuaRaylib<'l> {
+                         std::mem::drop(boxed_handle);
+                     }
+                 }
+             });
++            
++            // Poll input events and wait for frame timing
++            // This is what makes the FPS limiting actually work
++            this.rl.poll_input_events();
++            let target_time = this.rl.get_frame_time();
++            if target_time > 0.0 {
++                this.rl.wait_time((1.0 / 60.0 - target_time) as f64);
++            }
+             Ok(())
+         });
