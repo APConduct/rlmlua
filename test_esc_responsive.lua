@@ -25,7 +25,15 @@ local frame_count = 0
 local start_frame = -1
 local esc_detected = false
 
-while not window:window_should_close() do
+while true do
+    -- Poll input events FIRST, at the start of the frame
+    window:poll_input_events()
+
+    -- NOW check if we should close (after polling)
+    if window:window_should_close() then
+        break
+    end
+
     frame_count = frame_count + 1
 
     -- Track when ESC is first detected

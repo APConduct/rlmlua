@@ -17,8 +17,8 @@ struct LuaRaylib<'l> {
 impl<'l> LuaUserData for LuaRaylib<'l> {
     fn add_methods<'lua, M: LuaUserDataMethods<Self>>(methods: &mut M) {
         methods.add_method_mut("window_should_close", |_, this, ()| {
-            // Poll input events to ensure we catch ESC key presses
-            this.rl.poll_input_events();
+            // Without custom_frame_control, EndDrawing() automatically polls events
+            // So WindowShouldClose() works correctly
             Ok(this.rl.window_should_close())
         });
 
@@ -213,9 +213,11 @@ impl<'l> LuaUserData for LuaRaylib<'l> {
             },
         );
 
-        // Input polling
-        methods.add_method_mut("poll_input_events", |_, this, ()| {
-            this.rl.poll_input_events();
+        // Exit key configuration
+        methods.add_method_mut("set_exit_key", |_, this, key: i32| {
+            unsafe {
+                ffi::SetExitKey(key);
+            }
             Ok(())
         });
 

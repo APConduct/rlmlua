@@ -13,7 +13,15 @@ print("Press ESC to close the window")
 print("The window should close immediately on first ESC press")
 print("")
 
-while not window:window_should_close() and frame < max_frames do
+while true do
+    -- Poll input events FIRST, at the start of the frame
+    window:poll_input_events()
+
+    -- NOW check if we should close (after polling)
+    if window:window_should_close() or frame >= max_frames then
+        break
+    end
+
     frame = frame + 1
 
     -- Check if ESC was pressed this frame

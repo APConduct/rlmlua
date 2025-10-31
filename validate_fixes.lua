@@ -68,7 +68,10 @@ local render_success = true
 local render_error = nil
 
 for frame = 1, 5 do
-    -- Check window_should_close (this polls input)
+    -- Poll input events first
+    window:poll_input_events()
+
+    -- Check window_should_close (after polling)
     if window:window_should_close() then
         break
     end
@@ -101,6 +104,9 @@ local input_success = true
 local input_error = nil
 
 for frame = 1, input_test_frames do
+    -- Poll input events first
+    window:poll_input_events()
+
     if window:window_should_close() then
         break
     end
@@ -157,7 +163,15 @@ print("")
 local demo_frames = 180 -- 3 seconds at 60 FPS
 local frame_count = 0
 
-while not window:window_should_close() and frame_count < demo_frames do
+while true do
+    -- Poll input events FIRST, at the start of the frame
+    window:poll_input_events()
+
+    -- NOW check if we should close (after polling)
+    if window:window_should_close() or frame_count >= demo_frames then
+        break
+    end
+
     frame_count = frame_count + 1
 
     -- Test input responsiveness
