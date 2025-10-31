@@ -1,0 +1,22 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
+  "runtime": {
+    "version": "Lua 5.4",
+    "path": ["?.lua", "?/init.lua", "lua/?.lua", "lua/?/init.lua"]
+  },
+  "workspace": {
+    "library": ["lua", "lua/raylib"],
+    "checkThirdParty": false
+  },
+  "diagnostics": {
+    "globals": ["raylib"]
+  },
+  "completion": {
+    "callSnippet": "Both",
+    "keywordSnippet": "Both"
+  },
+  "hint": {
+    "enable": true,
+    "setType": true
+  }
+}

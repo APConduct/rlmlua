@@ -6,6 +6,7 @@ edition = "2024"
 [dependencies]
 raylib = "5.0"
 mlua = {version = "0.10.0", features = ["lua54", "vendored"]}
+fs = "0.0.5"
 
 [lib]
 name = "rlmlua"

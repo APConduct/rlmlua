@@ -1,6 +1,7 @@
 use mlua::prelude::*;
 use raylib::prelude::*;
 
+#[allow(dead_code)]
 struct LuaRaylib {
     rl: RaylibHandle,
     thread: RaylibThread,
