@@ -190,6 +190,12 @@ fn generate_raylib_definitions() {
             "(x: integer, y: integer, radius: number, color: Color)",
             "Draw circle outline",
         ),
+        (
+            "draw_circle_v",
+            "nil",
+            "(v: Vector2, radius: number, color: Color)",
+            "Draw circle outline",
+        ),
         // Input - Keyboard
         (
             "is_key_pressed",
@@ -260,7 +266,33 @@ fn generate_raylib_definitions() {
             "",
             "Get the height of the screen",
         ),
+        (
+            "get_mouse_x",
+            "number",
+            "",
+            "Get the x position of the mouse",
+        ),
+        (
+            "get_mouse_y",
+            "number",
+            "",
+            "Get the y position of the mouse",
+        ),
+        (
+            "get_mouse_button",
+            "boolean",
+            "(button: integer)",
+            "Check if a mouse button is being pressed",
+        ),
+        (
+            "get_mouse_wheel_move",
+            "number",
+            "",
+            "Get the scroll wheel position",
+        ),
     ];
+
+    let other_functions: Vec<(&str, &str, &str, &'static str)> = vec![];
 
     for (name, ret_type, params, desc) in window_methods {
         output.push_str(&format!("---{}\n", desc));

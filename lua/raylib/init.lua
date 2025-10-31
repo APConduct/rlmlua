@@ -9,6 +9,8 @@ local rl = {}
 rl.init_window = raylib_core.init_window
 rl.color = raylib_core.color
 rl.colors = raylib_core.colors
+rl.Vector2 = raylib_core.Vector2
+rl.Vector3 = raylib_core.Vector3
 
 -- Helper: Safe drawing wrapper with automatic begin/end
 -- This prevents forgetting to call end_drawing and handles errors gracefully

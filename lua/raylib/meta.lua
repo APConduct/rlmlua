@@ -137,6 +137,14 @@ function Window:draw_rectangle_lines(x, y, width, height, color) end
 ---@return nil
 function Window:draw_circle_lines(x, y, radius, color) end
 
+---Draw circle outline
+---@param self Window
+---@param v Vector2
+---@param radius number
+---@param color Color
+---@return nil
+function Window:draw_circle_v(v, radius, color) end
+
 ---Check if a key has been pressed once
 ---@param self Window
 ---@param key string
@@ -209,6 +217,27 @@ function Window:get_screen_width() end
 ---@param self Window
 ---@return number
 function Window:get_screen_height() end
+
+---Get the x position of the mouse
+---@param self Window
+---@return number
+function Window:get_mouse_x() end
+
+---Get the y position of the mouse
+---@param self Window
+---@return number
+function Window:get_mouse_y() end
+
+---Check if a mouse button is being pressed
+---@param self Window
+---@param button integer
+---@return boolean
+function Window:get_mouse_button(button) end
+
+---Get the scroll wheel position
+---@param self Window
+---@return number
+function Window:get_mouse_wheel_move() end
 
 ---Initialize window and OpenGL context
 ---@param width integer Window width
