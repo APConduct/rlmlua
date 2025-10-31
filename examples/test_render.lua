@@ -8,15 +8,8 @@ local max_frames = 180 -- Run for 3 seconds at 60 FPS
 
 print("Starting render test for 3 seconds...")
 
-while true do
-    -- Poll input events FIRST, at the start of the frame
-    window:poll_input_events()
-
-    -- NOW check if we should close (after polling)
-    if window:window_should_close() or frame >= max_frames then
-        break
-    end
-
+-- Standard raylib pattern - no manual polling needed!
+while not window:window_should_close() and frame < max_frames do
     frame = frame + 1
 
     window:begin_drawing()
@@ -41,6 +34,7 @@ while true do
     window:draw_text("Press ESC to exit early", 250, 400, 20, rl.colors.DARKGRAY)
 
     window:end_drawing()
+    -- EndDrawing automatically handles input polling, frame timing, and buffer swapping
 end
 
 print("✓ Render test completed successfully after " .. frame .. " frames")

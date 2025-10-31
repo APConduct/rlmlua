@@ -1,10 +1,10 @@
 local rl = require("raylib")
 
--- Comprehensive validation script to verify all bug fixes
--- Tests: rendering, input responsiveness, color availability
+-- Comprehensive validation script to verify the bug fixes
+-- Now using standard raylib pattern (no manual polling needed)
 
 print("========================================")
-print("RLMLUA BUG FIX VALIDATION")
+print("RLMLUA VALIDATION TEST")
 print("========================================")
 print("")
 
@@ -59,7 +59,6 @@ test("is_key_pressed exists", type(window.is_key_pressed) == "function", "Method
 test("is_key_down exists", type(window.is_key_down) == "function", "Method not found")
 test("is_mouse_button_pressed exists", type(window.is_mouse_button_pressed) == "function", "Method not found")
 test("get_mouse_position exists", type(window.get_mouse_position) == "function", "Method not found")
-test("poll_input_events exists", type(window.poll_input_events) == "function", "Method not found")
 print("")
 
 -- Test 6: Actual rendering (run for a few frames)
@@ -68,15 +67,10 @@ local render_success = true
 local render_error = nil
 
 for frame = 1, 5 do
-    -- Poll input events first
-    window:poll_input_events()
-
-    -- Check window_should_close (after polling)
     if window:window_should_close() then
         break
     end
 
-    -- Try rendering
     local success, err = pcall(function()
         window:begin_drawing()
         window:clear_background(rl.colors.RAYWHITE)
@@ -97,16 +91,13 @@ end
 test("Rendering operations", render_success, render_error or "")
 print("")
 
--- Test 7: Input polling pattern
-print("Test 7: Input Polling Pattern")
+-- Test 7: Input checking pattern
+print("Test 7: Input Checking Pattern")
 local input_test_frames = 3
 local input_success = true
 local input_error = nil
 
 for frame = 1, input_test_frames do
-    -- Poll input events first
-    window:poll_input_events()
-
     if window:window_should_close() then
         break
     end
@@ -125,13 +116,12 @@ for frame = 1, input_test_frames do
         break
     end
 
-    -- Do a minimal frame to keep window responsive
     window:begin_drawing()
     window:clear_background(rl.colors.WHITE)
     window:end_drawing()
 end
 
-test("Input polling", input_success, input_error or "")
+test("Input checking", input_success, input_error or "")
 print("")
 
 -- Test 8: FPS and timing functions
@@ -155,7 +145,7 @@ end)
 test("Screen dimensions", screen_success, screen_err or "")
 print("")
 
--- Final visual test with all fixes demonstrated
+-- Final visual test
 print("Running visual demonstration (3 seconds)...")
 print("This tests all fixes working together.")
 print("")
@@ -163,15 +153,7 @@ print("")
 local demo_frames = 180 -- 3 seconds at 60 FPS
 local frame_count = 0
 
-while true do
-    -- Poll input events FIRST, at the start of the frame
-    window:poll_input_events()
-
-    -- NOW check if we should close (after polling)
-    if window:window_should_close() or frame_count >= demo_frames then
-        break
-    end
-
+while not window:window_should_close() and frame_count < demo_frames do
     frame_count = frame_count + 1
 
     -- Test input responsiveness
@@ -181,15 +163,13 @@ while true do
     window:clear_background(rl.colors.RAYWHITE)
 
     -- Title
-    window:draw_text("All Fixes Validated!", 250, 50, 30, rl.colors.DARKBLUE)
+    window:draw_text("All Systems Working!", 250, 50, 30, rl.colors.DARKBLUE)
 
     -- Status
     window:draw_text("Frame: " .. frame_count .. " / " .. demo_frames, 320, 120, 20, rl.colors.BLACK)
 
-    -- Color test
-    window:draw_text("RAYWHITE bg, colors work!", 230, 160, 20, rl.colors.DARKGRAY)
-
     -- Drawing primitives test
+    window:draw_text("Drawing primitives:", 280, 160, 20, rl.colors.DARKGRAY)
     window:draw_rectangle(100, 220, 80, 60, rl.colors.RED)
     window:draw_circle(250, 250, 30, rl.colors.BLUE)
     window:draw_line(320, 220, 380, 280, rl.colors.GREEN)
@@ -197,17 +177,18 @@ while true do
     window:draw_circle_lines(570, 250, 30, rl.colors.ORANGE)
 
     -- Input test
-    window:draw_text("Hold SPACE to test input:", 230, 320, 20, rl.colors.BLACK)
+    window:draw_text("Hold SPACE to test input:", 250, 320, 18, rl.colors.BLACK)
     if space_down then
-        window:draw_text("SPACE IS DOWN!", 280, 350, 25, rl.colors.GREEN)
+        window:draw_text("SPACE IS DOWN!", 280, 345, 20, rl.colors.GREEN)
     else
-        window:draw_text("(not pressed)", 310, 350, 20, rl.colors.GRAY)
+        window:draw_text("(not pressed)", 310, 345, 18, rl.colors.GRAY)
     end
 
     -- Exit instruction
-    window:draw_text("Press ESC to exit early", 270, 400, 18, rl.colors.DARKGRAY)
+    window:draw_text("Press ESC or click X to exit", 250, 400, 16, rl.colors.DARKGRAY)
 
     window:end_drawing()
+    -- EndDrawing automatically handles input polling, frame timing, and buffer swapping!
 end
 
 print("")
@@ -222,17 +203,20 @@ if all_passed then
     print("Summary:")
     print("  • Window rendering: WORKING")
     print("  • Input responsiveness: FIXED")
-    print("  • RAYWHITE color: AVAILABLE")
+    print("  • Color constants: AVAILABLE")
     print("  • Drawing methods: FUNCTIONAL")
-    print("  • Input polling: CORRECT PATTERN")
+    print("  • Standard raylib pattern: WORKING")
     print("")
-    print("The bug fixes are successful!")
+    print("The project is working correctly!")
 else
     print("✗✗✗ SOME TESTS FAILED ✗✗✗")
     print("")
     print("Please review the test output above.")
 end
 
+print("")
+print("Note: This uses standard raylib behavior where EndDrawing()")
+print("automatically handles input polling and frame timing.")
 print("")
 print("Validation complete.")
 print("========================================")

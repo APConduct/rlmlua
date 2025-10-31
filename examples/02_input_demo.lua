@@ -22,17 +22,8 @@ print("Mouse click: Count clicks")
 print("ESC: Exit")
 print("")
 
-while true do
-    -- Poll input events FIRST, at the start of the frame
-    window:poll_input_events()
-
-    -- NOW check if we should close (after polling)
-    if window:window_should_close() then
-        break
-    end
-
-    -- All input checks below use the polled state from above
-
+-- Standard raylib pattern - EndDrawing() automatically handles input polling!
+while not window:window_should_close() do
     -- Keyboard input - continuous (is_key_down for held keys)
     if window:is_key_down("RIGHT") then
         ball_x = ball_x + ball_speed
@@ -96,6 +87,7 @@ while true do
     window:draw_line(mx, my - 10, mx, my + 10, rl.colors.RED)
 
     window:end_drawing()
+    -- EndDrawing automatically handles input polling, frame timing, and buffer swapping
 end
 
 print("")
