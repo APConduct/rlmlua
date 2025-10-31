@@ -1110,7 +1110,7 @@ fn rlm_lua(lua: &Lua) -> LuaResult<LuaTable> {
     let exports = lua.create_table()?;
 
     // Vector2 functions
-    exports.set("vector2", lua.create_function(vector2)?)?;
+    exports.set("vec2", lua.create_function(vector2)?)?;
 
     // Version info
     exports.set("_VERSION", "0.1.0")?;
