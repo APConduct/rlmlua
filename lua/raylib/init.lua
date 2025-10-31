@@ -14,6 +14,7 @@ rl.colors = raylib_core.colors
 -- This prevents forgetting to call end_drawing and handles errors gracefully
 ---@param window Window
 ---@param callback fun(window: Window)
+---@diagnostic disable-next-line: duplicate-set-field
 function rl.draw(window, callback)
     window:begin_drawing()
     local success, err = pcall(callback, window)

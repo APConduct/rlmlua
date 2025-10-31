@@ -8,12 +8,13 @@ thread_local! {
 }
 
 #[allow(dead_code)]
-struct LuaRaylib {
+struct LuaRaylib<'l> {
     rl: RaylibHandle,
     thread: RaylibThread,
+    dh: Option<RaylibDrawHandle<'l>>,
 }
 
-impl LuaUserData for LuaRaylib {
+impl<'l> LuaUserData for LuaRaylib<'l> {
     fn add_methods<'lua, M: LuaUserDataMethods<Self>>(methods: &mut M) {
         methods.add_method_mut("window_should_close", |_, this, ()| {
             Ok(this.rl.window_should_close())
@@ -372,13 +373,16 @@ pub fn int_to_mouse_button(button: i32) -> MouseButton {
 // =============================================================================
 
 /// Initialize window and OpenGL context
-fn init_window(_lua: &Lua, (width, height, title): (i32, i32, String)) -> LuaResult<LuaRaylib> {
+fn init_window<'l>(
+    _lua: &Lua,
+    (width, height, title): (i32, i32, String),
+) -> LuaResult<LuaRaylib<'l>> {
     let (rl, thread) = raylib::init().size(width, height).title(&title).build();
 
     Ok(LuaRaylib {
         rl,
         thread,
-        // draw: None,
+        dh: None,
     })
 }
 
