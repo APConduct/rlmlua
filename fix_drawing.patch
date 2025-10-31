@@ -1,7 +1,0 @@
-The problem: We're storing a raw pointer with transmuted lifetime, and the Drop
-might not be happening correctly to trigger raylib's EndDrawing + frame timing.
-
-Solution: Use a flag-based approach where we track if we're in drawing mode,
-and ensure proper synchronous dropping of the RaylibDrawHandle.
-
-Better yet: Just use the Option<RaylibDrawHandle> field that already exists!
