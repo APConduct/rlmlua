@@ -200,6 +200,16 @@ function Window:is_mouse_button_released(button) end
 ---@return boolean
 function Window:is_mouse_button_up(button) end
 
+---Get the width of the screen
+---@param self Window
+---@return number
+function Window:get_screen_width() end
+
+---Get the height of the screen
+---@param self Window
+---@return number
+function Window:get_screen_height() end
+
 ---Initialize window and OpenGL context
 ---@param width integer Window width
 ---@param height integer Window height
@@ -236,6 +246,8 @@ function raylib.draw(window, callback) end
 ---@field SKYBLUE Color Sky Blue (102, 191, 255, 255)
 ---@field ORANGE Color Orange (255, 161, 0, 255)
 ---@field PURPLE Color Purple (200, 122, 255, 255)
+---@field RAYWHITE Color Ray White (245, 245, 245, 255)
+---@field DARKBLUE Color Dark Blue (0, 0, 128, 255)
 raylib.colors = {}
 
 ---Key string constants for keyboard input

@@ -15,7 +15,6 @@ print("")
 
 while true do
     -- Poll input events FIRST, at the start of the frame
-    window:poll_input_events()
 
     -- NOW check if we should close (after polling)
     if window:window_should_close() or frame >= max_frames then

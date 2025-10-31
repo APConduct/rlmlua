@@ -248,6 +248,18 @@ fn generate_raylib_definitions() {
             "(button: integer)",
             "Check if a mouse button is NOT being pressed",
         ),
+        (
+            "get_screen_width",
+            "number",
+            "",
+            "Get the width of the screen",
+        ),
+        (
+            "get_screen_height",
+            "number",
+            "",
+            "Get the height of the screen",
+        ),
     ];
 
     for (name, ret_type, params, desc) in window_methods {
@@ -320,6 +332,8 @@ fn generate_raylib_definitions() {
     output.push_str("---@field SKYBLUE Color Sky Blue (102, 191, 255, 255)\n");
     output.push_str("---@field ORANGE Color Orange (255, 161, 0, 255)\n");
     output.push_str("---@field PURPLE Color Purple (200, 122, 255, 255)\n");
+    output.push_str("---@field RAYWHITE Color Ray White (245, 245, 245, 255)\n");
+    output.push_str("---@field DARKBLUE Color Dark Blue (0, 0, 128, 255)\n");
     output.push_str("raylib.colors = {}\n\n");
 
     // Key constants documentation
