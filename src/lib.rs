@@ -17,6 +17,8 @@ struct LuaRaylib<'l> {
 impl<'l> LuaUserData for LuaRaylib<'l> {
     fn add_methods<'lua, M: LuaUserDataMethods<Self>>(methods: &mut M) {
         methods.add_method_mut("window_should_close", |_, this, ()| {
+            // Poll input events to ensure window state is up to date
+            this.rl.poll_input_events();
             Ok(this.rl.window_should_close())
         });
 

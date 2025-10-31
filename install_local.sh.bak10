@@ -16,11 +16,10 @@ if [ "$OS_NAME" = "Darwin" ]; then
     INSTALL_NAME="raylib_lua.dylib"
 elif [ "$OS_NAME" = "Linux" ]; then
     DYNAM_EXT=".so"
-    INSTALL_NAME="raylib_lua.so"
+    INSTALL_NAME="raylib_lua.dylib"
 else
     DYNAM_EXT=".dll"
     INSTALL_NAME="raylib_lua.dll"
-fi
 fi
 
 # Get Lua version
