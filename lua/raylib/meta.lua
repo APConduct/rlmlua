@@ -36,7 +36,7 @@ function Window:window_should_close() end
 
 ---Set target FPS (maximum)
 ---@param self Window
----@param fps number
+---@param fps integer
 ---@return nil
 function Window:set_target_fps(fps) end
 
@@ -74,27 +74,27 @@ function Window:clear_background(color) end
 ---Draw text (using default font)
 ---@param self Window
 ---@param text string
----@param x number
----@param y number
----@param size number
+---@param x integer
+---@param y integer
+---@param size integer
 ---@param color Color
 ---@return nil
 function Window:draw_text(text, x, y, size, color) end
 
 ---Draw a color-filled rectangle
 ---@param self Window
----@param x number
----@param y number
----@param width number
----@param height number
+---@param x integer
+---@param y integer
+---@param width integer
+---@param height integer
 ---@param color Color
 ---@return nil
 function Window:draw_rectangle(x, y, width, height, color) end
 
 ---Draw a color-filled circle
 ---@param self Window
----@param x number
----@param y number
+---@param x integer
+---@param y integer
 ---@param radius number
 ---@param color Color
 ---@return nil
@@ -102,35 +102,103 @@ function Window:draw_circle(x, y, radius, color) end
 
 ---Draw line
 ---@param self Window
----@param x1 number
----@param y1 number
----@param x2 number
----@param y2 number
+---@param x1 integer
+---@param y1 integer
+---@param x2 integer
+---@param y2 integer
 ---@param color Color
 ---@return nil
 function Window:draw_line(x1, y1, x2, y2, color) end
 
----Check if key was pressed once
+---Draw pixel
 ---@param self Window
----@param key number
+---@param x integer
+---@param y integer
+---@param color Color
+---@return nil
+function Window:draw_pixel(x, y, color) end
+
+---Draw rectangle outline
+---@param self Window
+---@param x integer
+---@param y integer
+---@param width integer
+---@param height integer
+---@param color Color
+---@return nil
+function Window:draw_rectangle_lines(x, y, width, height, color) end
+
+---Draw circle outline
+---@param self Window
+---@param x integer
+---@param y integer
+---@param radius number
+---@param color Color
+---@return nil
+function Window:draw_circle_lines(x, y, radius, color) end
+
+---Check if a key has been pressed once
+---@param self Window
+---@param key string
 ---@return boolean
 function Window:is_key_pressed(key) end
 
----Check if key is being held down
+---Check if a key is being pressed
 ---@param self Window
----@param key number
+---@param key string
 ---@return boolean
 function Window:is_key_down(key) end
+
+---Check if a key has been released once
+---@param self Window
+---@param key string
+---@return boolean
+function Window:is_key_released(key) end
+
+---Check if a key is NOT being pressed
+---@param self Window
+---@param key string
+---@return boolean
+function Window:is_key_up(key) end
 
 ---Get mouse position X and Y
 ---@param self Window
 ---@return number, number
 function Window:get_mouse_position() end
 
----Check if mouse button pressed (0=left, 1=right, 2=middle)
+---Get mouse position X
 ---@param self Window
+---@return number
+function Window:get_mouse_x() end
+
+---Get mouse position Y
+---@param self Window
+---@return number
+function Window:get_mouse_y() end
+
+---Check if a mouse button has been pressed once (0=left, 1=right, 2=middle)
+---@param self Window
+---@param button integer
 ---@return boolean
-function Window:is_mouse_button_pressed() end
+function Window:is_mouse_button_pressed(button) end
+
+---Check if a mouse button is being pressed
+---@param self Window
+---@param button integer
+---@return boolean
+function Window:is_mouse_button_down(button) end
+
+---Check if a mouse button has been released once
+---@param self Window
+---@param button integer
+---@return boolean
+function Window:is_mouse_button_released(button) end
+
+---Check if a mouse button is NOT being pressed
+---@param self Window
+---@param button integer
+---@return boolean
+function Window:is_mouse_button_up(button) end
 
 ---Initialize window and OpenGL context
 ---@param width integer Window width
@@ -147,17 +215,32 @@ function raylib.init_window(width, height, title) end
 ---@return Color
 function raylib.color(r, g, b, a) end
 
----Predefined colors
+---Convenience function for safe drawing with automatic begin/end
+---@param window Window The window to draw on
+---@param callback fun(window: Window) Drawing callback function
+function raylib.draw(window, callback) end
+
+---Predefined color constants
 ---@class Colors
----@field WHITE Color
----@field BLACK Color
----@field RED Color
----@field GREEN Color
----@field BLUE Color
----@field YELLOW Color
----@field MAGENTA Color
----@field GRAY Color
----@field SKYBLUE Color
+---@field WHITE Color White (255, 255, 255, 255)
+---@field BLACK Color Black (0, 0, 0, 255)
+---@field RED Color Red (255, 0, 0, 255)
+---@field GREEN Color Green (0, 255, 0, 255)
+---@field BLUE Color Blue (0, 0, 255, 255)
+---@field YELLOW Color Yellow (255, 255, 0, 255)
+---@field MAGENTA Color Magenta (255, 0, 255, 255)
+---@field CYAN Color Cyan (0, 255, 255, 255)
+---@field GRAY Color Gray (130, 130, 130, 255)
+---@field DARKGRAY Color Dark Gray (80, 80, 80, 255)
+---@field LIGHTGRAY Color Light Gray (200, 200, 200, 255)
+---@field SKYBLUE Color Sky Blue (102, 191, 255, 255)
+---@field ORANGE Color Orange (255, 161, 0, 255)
+---@field PURPLE Color Purple (200, 122, 255, 255)
 raylib.colors = {}
+
+---Key string constants for keyboard input
+---Supported keys: "SPACE", "ESCAPE", "ENTER", "TAB", "BACKSPACE",
+---"UP", "DOWN", "LEFT", "RIGHT", "A"-"Z", "0"-"9",
+---"F1"-"F12", "SHIFT", "CTRL", "ALT"
 
 return raylib

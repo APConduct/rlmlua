@@ -112,7 +112,7 @@ fn generate_raylib_definitions() {
         (
             "set_target_fps",
             "nil",
-            "(fps: number)",
+            "(fps: integer)",
             "Set target FPS (maximum)",
         ),
         ("get_fps", "integer", "()", "Get current FPS"),
@@ -151,50 +151,102 @@ fn generate_raylib_definitions() {
         (
             "draw_text",
             "nil",
-            "(text: string, x: number, y: number, size: number, color: Color)",
+            "(text: string, x: integer, y: integer, size: integer, color: Color)",
             "Draw text (using default font)",
         ),
         (
             "draw_rectangle",
             "nil",
-            "(x: number, y: number, width: number, height: number, color: Color)",
+            "(x: integer, y: integer, width: integer, height: integer, color: Color)",
             "Draw a color-filled rectangle",
         ),
         (
             "draw_circle",
             "nil",
-            "(x: number, y: number, radius: number, color: Color)",
+            "(x: integer, y: integer, radius: number, color: Color)",
             "Draw a color-filled circle",
         ),
         (
             "draw_line",
             "nil",
-            "(x1: number, y1: number, x2: number, y2: number, color: Color)",
+            "(x1: integer, y1: integer, x2: integer, y2: integer, color: Color)",
             "Draw line",
         ),
         (
+            "draw_pixel",
+            "nil",
+            "(x: integer, y: integer, color: Color)",
+            "Draw pixel",
+        ),
+        (
+            "draw_rectangle_lines",
+            "nil",
+            "(x: integer, y: integer, width: integer, height: integer, color: Color)",
+            "Draw rectangle outline",
+        ),
+        (
+            "draw_circle_lines",
+            "nil",
+            "(x: integer, y: integer, radius: number, color: Color)",
+            "Draw circle outline",
+        ),
+        // Input - Keyboard
+        (
             "is_key_pressed",
             "boolean",
-            "(key: number)",
-            "Check if key was pressed once",
+            "(key: string)",
+            "Check if a key has been pressed once",
         ),
         (
             "is_key_down",
             "boolean",
-            "(key: number)",
-            "Check if key is being held down",
+            "(key: string)",
+            "Check if a key is being pressed",
         ),
+        (
+            "is_key_released",
+            "boolean",
+            "(key: string)",
+            "Check if a key has been released once",
+        ),
+        (
+            "is_key_up",
+            "boolean",
+            "(key: string)",
+            "Check if a key is NOT being pressed",
+        ),
+        // Input - Mouse
         (
             "get_mouse_position",
             "number, number",
             "()",
             "Get mouse position X and Y",
         ),
+        ("get_mouse_x", "number", "()", "Get mouse position X"),
+        ("get_mouse_y", "number", "()", "Get mouse position Y"),
         (
             "is_mouse_button_pressed",
             "boolean",
-            "(button)",
-            "Check if mouse button pressed (0=left, 1=right, 2=middle)",
+            "(button: integer)",
+            "Check if a mouse button has been pressed once (0=left, 1=right, 2=middle)",
+        ),
+        (
+            "is_mouse_button_down",
+            "boolean",
+            "(button: integer)",
+            "Check if a mouse button is being pressed",
+        ),
+        (
+            "is_mouse_button_released",
+            "boolean",
+            "(button: integer)",
+            "Check if a mouse button has been released once",
+        ),
+        (
+            "is_mouse_button_up",
+            "boolean",
+            "(button: integer)",
+            "Check if a mouse button is NOT being pressed",
         ),
     ];
 
@@ -246,19 +298,36 @@ fn generate_raylib_definitions() {
     output.push_str("---@return Color\n");
     output.push_str("function raylib.color(r, g, b, a) end\n\n");
 
+    output.push_str("---Convenience function for safe drawing with automatic begin/end\n");
+    output.push_str("---@param window Window The window to draw on\n");
+    output.push_str("---@param callback fun(window: Window) Drawing callback function\n");
+    output.push_str("function raylib.draw(window, callback) end\n\n");
+
     // Color constants
-    output.push_str("---Predefined colors\n");
+    output.push_str("---Predefined color constants\n");
     output.push_str("---@class Colors\n");
-    output.push_str("---@field WHITE Color\n");
-    output.push_str("---@field BLACK Color\n");
-    output.push_str("---@field RED Color\n");
-    output.push_str("---@field GREEN Color\n");
-    output.push_str("---@field BLUE Color\n");
-    output.push_str("---@field YELLOW Color\n");
-    output.push_str("---@field MAGENTA Color\n");
-    output.push_str("---@field GRAY Color\n");
-    output.push_str("---@field SKYBLUE Color\n");
+    output.push_str("---@field WHITE Color White (255, 255, 255, 255)\n");
+    output.push_str("---@field BLACK Color Black (0, 0, 0, 255)\n");
+    output.push_str("---@field RED Color Red (255, 0, 0, 255)\n");
+    output.push_str("---@field GREEN Color Green (0, 255, 0, 255)\n");
+    output.push_str("---@field BLUE Color Blue (0, 0, 255, 255)\n");
+    output.push_str("---@field YELLOW Color Yellow (255, 255, 0, 255)\n");
+    output.push_str("---@field MAGENTA Color Magenta (255, 0, 255, 255)\n");
+    output.push_str("---@field CYAN Color Cyan (0, 255, 255, 255)\n");
+    output.push_str("---@field GRAY Color Gray (130, 130, 130, 255)\n");
+    output.push_str("---@field DARKGRAY Color Dark Gray (80, 80, 80, 255)\n");
+    output.push_str("---@field LIGHTGRAY Color Light Gray (200, 200, 200, 255)\n");
+    output.push_str("---@field SKYBLUE Color Sky Blue (102, 191, 255, 255)\n");
+    output.push_str("---@field ORANGE Color Orange (255, 161, 0, 255)\n");
+    output.push_str("---@field PURPLE Color Purple (200, 122, 255, 255)\n");
     output.push_str("raylib.colors = {}\n\n");
+
+    // Key constants documentation
+    output.push_str("---Key string constants for keyboard input\n");
+    output
+        .push_str("---Supported keys: \"SPACE\", \"ESCAPE\", \"ENTER\", \"TAB\", \"BACKSPACE\",\n");
+    output.push_str("---\"UP\", \"DOWN\", \"LEFT\", \"RIGHT\", \"A\"-\"Z\", \"0\"-\"9\",\n");
+    output.push_str("---\"F1\"-\"F12\", \"SHIFT\", \"CTRL\", \"ALT\"\n\n");
 
     output.push_str("return raylib\n");
 
@@ -266,12 +335,240 @@ fn generate_raylib_definitions() {
     // fs::create_dir_all("lua/raylib").unwrap();
     fs::create_dir_all("lua/raylib").unwrap();
 
-    // let mut file = fs::File::create("lua/raylib/init.lua").unwrap();
+    // Write to library directory - name it 'meta.lua' not 'raylib.d.lua'
+    fs::create_dir_all("lua/raylib").unwrap();
     let mut file = fs::File::create("lua/raylib/meta.lua").unwrap();
-
     file.write_all(output.as_bytes()).unwrap();
-
-    println!("cargo:rerun-if-changed=build.rs");
 }
 
-fn generate_rlmlua_definitions() {}
+fn generate_rlmlua_definitions() {
+    let mut output = String::new();
+
+    // Header with @meta tag
+    output.push_str("---@meta rlmlua\n\n");
+    output.push_str("---Math and utility helpers for raylib\n");
+    output.push_str("---@class rlmlua\n");
+    output.push_str("local rlmlua = {}\n\n");
+
+    output.push_str("---Reference to raylib module (auto-loaded for convenience)\n");
+    output.push_str("---@type raylib\n");
+    output.push_str("rlmlua.raylib = nil\n\n");
+
+    // Vector functions
+    output.push_str("---Create a 2D vector\n");
+    output.push_str("---@param x number X coordinate\n");
+    output.push_str("---@param y number Y coordinate\n");
+    output.push_str("---@return Vector2\n");
+    output.push_str("function rlmlua.vec2(x, y) end\n\n");
+
+    output.push_str("---Create a 3D vector\n");
+    output.push_str("---@param x number X coordinate\n");
+    output.push_str("---@param y number Y coordinate\n");
+    output.push_str("---@param z number Z coordinate\n");
+    output.push_str("---@return Vector3\n");
+    output.push_str("function rlmlua.vec3(x, y, z) end\n\n");
+
+    output.push_str("---Add two 2D vectors\n");
+    output.push_str("---@param a Vector2\n");
+    output.push_str("---@param b Vector2\n");
+    output.push_str("---@return Vector2\n");
+    output.push_str("function rlmlua.vec2_add(a, b) end\n\n");
+
+    output.push_str("---Subtract two 2D vectors\n");
+    output.push_str("---@param a Vector2\n");
+    output.push_str("---@param b Vector2\n");
+    output.push_str("---@return Vector2\n");
+    output.push_str("function rlmlua.vec2_sub(a, b) end\n\n");
+
+    output.push_str("---Scale a 2D vector\n");
+    output.push_str("---@param v Vector2\n");
+    output.push_str("---@param s number Scale factor\n");
+    output.push_str("---@return Vector2\n");
+    output.push_str("function rlmlua.vec2_scale(v, s) end\n\n");
+
+    output.push_str("---Get length of a 2D vector\n");
+    output.push_str("---@param v Vector2\n");
+    output.push_str("---@return number\n");
+    output.push_str("function rlmlua.vec2_length(v) end\n\n");
+
+    output.push_str("---Normalize a 2D vector\n");
+    output.push_str("---@param v Vector2\n");
+    output.push_str("---@return Vector2\n");
+    output.push_str("function rlmlua.vec2_normalize(v) end\n\n");
+
+    output.push_str("---Calculate distance between two points\n");
+    output.push_str("---@param a Vector2\n");
+    output.push_str("---@param b Vector2\n");
+    output.push_str("---@return number\n");
+    output.push_str("function rlmlua.distance(a, b) end\n\n");
+
+    output.push_str("---Dot product of two 2D vectors\n");
+    output.push_str("---@param a Vector2\n");
+    output.push_str("---@param b Vector2\n");
+    output.push_str("---@return number\n");
+    output.push_str("function rlmlua.vec2_dot(a, b) end\n\n");
+
+    output.push_str("---Linear interpolation between two 2D vectors\n");
+    output.push_str("---@param a Vector2 Start vector\n");
+    output.push_str("---@param b Vector2 End vector\n");
+    output.push_str("---@param t number Interpolation factor (0-1)\n");
+    output.push_str("---@return Vector2\n");
+    output.push_str("function rlmlua.vec2_lerp(a, b, t) end\n\n");
+
+    // Rectangle functions
+    output.push_str("---Create a rectangle\n");
+    output.push_str("---@param x number X position\n");
+    output.push_str("---@param y number Y position\n");
+    output.push_str("---@param width number Rectangle width\n");
+    output.push_str("---@param height number Rectangle height\n");
+    output.push_str("---@return Rectangle\n");
+    output.push_str("function rlmlua.rect(x, y, width, height) end\n\n");
+
+    output.push_str("---Check if point is inside rectangle\n");
+    output.push_str("---@param rect Rectangle\n");
+    output.push_str("---@param x number Point X coordinate\n");
+    output.push_str("---@param y number Point Y coordinate\n");
+    output.push_str("---@return boolean\n");
+    output.push_str("function rlmlua.rect_contains_point(rect, x, y) end\n\n");
+
+    output.push_str("---Check if two rectangles overlap\n");
+    output.push_str("---@param a Rectangle\n");
+    output.push_str("---@param b Rectangle\n");
+    output.push_str("---@return boolean\n");
+    output.push_str("function rlmlua.rect_overlaps(a, b) end\n\n");
+
+    // Color functions
+    output.push_str("---Create color from hex string\n");
+    output.push_str("---@param hex string Hex color (e.g., \"#ff0000\" or \"ff0000\")\n");
+    output.push_str("---@return Color\n");
+    output.push_str("function rlmlua.color_from_hex(hex) end\n\n");
+
+    output.push_str("---Create color from HSV values\n");
+    output.push_str("---@param h number Hue (0-360)\n");
+    output.push_str("---@param s number Saturation (0-1)\n");
+    output.push_str("---@param v number Value (0-1)\n");
+    output.push_str("---@return Color\n");
+    output.push_str("function rlmlua.color_from_hsv(h, s, v) end\n\n");
+
+    output.push_str("---Interpolate between two colors\n");
+    output.push_str("---@param a Color Start color\n");
+    output.push_str("---@param b Color End color\n");
+    output.push_str("---@param t number Interpolation factor (0-1)\n");
+    output.push_str("---@return Color\n");
+    output.push_str("function rlmlua.color_lerp(a, b, t) end\n\n");
+
+    output.push_str("---Fade a color (reduce alpha)\n");
+    output.push_str("---@param color Color\n");
+    output.push_str("---@param alpha number Alpha multiplier (0-1)\n");
+    output.push_str("---@return Color\n");
+    output.push_str("function rlmlua.color_fade(color, alpha) end\n\n");
+
+    // Math utilities
+    output.push_str("---Linear interpolation between two values\n");
+    output.push_str("---@param a number Start value\n");
+    output.push_str("---@param b number End value\n");
+    output.push_str("---@param t number Interpolation factor (0-1)\n");
+    output.push_str("---@return number\n");
+    output.push_str("function rlmlua.lerp(a, b, t) end\n\n");
+
+    output.push_str("---Clamp value between min and max\n");
+    output.push_str("---@param value number\n");
+    output.push_str("---@param min number\n");
+    output.push_str("---@param max number\n");
+    output.push_str("---@return number\n");
+    output.push_str("function rlmlua.clamp(value, min, max) end\n\n");
+
+    output.push_str("---Map value from one range to another\n");
+    output.push_str("---@param value number\n");
+    output.push_str("---@param in_min number Input range minimum\n");
+    output.push_str("---@param in_max number Input range maximum\n");
+    output.push_str("---@param out_min number Output range minimum\n");
+    output.push_str("---@param out_max number Output range maximum\n");
+    output.push_str("---@return number\n");
+    output.push_str("function rlmlua.map(value, in_min, in_max, out_min, out_max) end\n\n");
+
+    output.push_str("---Smooth step interpolation (ease in/out)\n");
+    output.push_str("---@param t number Input (0-1)\n");
+    output.push_str("---@return number Smoothed output (0-1)\n");
+    output.push_str("function rlmlua.smoothstep(t) end\n\n");
+
+    output.push_str("---Convert degrees to radians\n");
+    output.push_str("---@param degrees number\n");
+    output.push_str("---@return number\n");
+    output.push_str("function rlmlua.deg_to_rad(degrees) end\n\n");
+
+    output.push_str("---Convert radians to degrees\n");
+    output.push_str("---@param radians number\n");
+    output.push_str("---@return number\n");
+    output.push_str("function rlmlua.rad_to_deg(radians) end\n\n");
+
+    // Random utilities
+    output.push_str("---Random float between min and max\n");
+    output.push_str("---@param min number\n");
+    output.push_str("---@param max number\n");
+    output.push_str("---@return number\n");
+    output.push_str("function rlmlua.random_range(min, max) end\n\n");
+
+    output.push_str("---Random integer between min and max (inclusive)\n");
+    output.push_str("---@param min integer\n");
+    output.push_str("---@param max integer\n");
+    output.push_str("---@return integer\n");
+    output.push_str("function rlmlua.random_int(min, max) end\n\n");
+
+    output.push_str("---Random boolean with optional probability\n");
+    output.push_str("---@param probability? number Probability of true (0-1, default 0.5)\n");
+    output.push_str("---@return boolean\n");
+    output.push_str("function rlmlua.random_bool(probability) end\n\n");
+
+    output.push_str("---Random choice from table\n");
+    output.push_str("---@param tbl table\n");
+    output.push_str("---@return any\n");
+    output.push_str("function rlmlua.random_choice(tbl) end\n\n");
+
+    // Easing functions
+    output.push_str("---Easing functions for animations\n");
+    output.push_str("---@class Ease\n");
+    output.push_str("rlmlua.ease = {}\n\n");
+
+    let easing_functions = vec![
+        "linear",
+        "in_quad",
+        "out_quad",
+        "in_out_quad",
+        "in_cubic",
+        "out_cubic",
+        "in_out_cubic",
+        "in_elastic",
+        "out_elastic",
+        "in_bounce",
+        "out_bounce",
+    ];
+
+    for ease_fn in easing_functions {
+        output.push_str(&format!("---@param t number Input (0-1)\n"));
+        output.push_str(&format!("---@return number Output (0-1)\n"));
+        output.push_str(&format!("function rlmlua.ease.{}(t) end\n\n", ease_fn));
+    }
+
+    // Timer
+    output.push_str("---Create a simple timer\n");
+    output.push_str("---@param duration number Timer duration in seconds\n");
+    output.push_str(
+        "---@return table timer Timer object with update(), progress(), reset() methods\n",
+    );
+    output.push_str("function rlmlua.timer(duration) end\n\n");
+
+    // Version info
+    output.push_str("---Version string\n");
+    output.push_str("rlmlua._VERSION = \"0.1.0\"\n\n");
+
+    output.push_str("---Description string\n");
+    output.push_str("rlmlua._DESCRIPTION = \"Math and utility helpers for raylib\"\n\n");
+
+    output.push_str("return rlmlua\n");
+
+    // Write to library directory - name it 'meta.lua'
+    fs::create_dir_all("lua/rlmlua").unwrap();
+    let mut file = fs::File::create("lua/rlmlua/meta.lua").unwrap();
+    file.write_all(output.as_bytes()).unwrap();
+}
