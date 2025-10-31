@@ -32,18 +32,15 @@ impl LuaUserData for LuaRaylib {
             Ok(this.rl.get_screen_height())
         });
 
-        // =====================================================================
         // Drawing Functions
-        // =====================================================================
 
-        methods.add_method_mut("begin_drawing", |_, this, ()| {
-            // In a full implementation, we'd need to store the draw handle
-            // and make drawing functions only available through it
+        methods.add_method_mut("begin_drawing", |_, _this, ()| {
+            // TODO: store the draw handle
             Ok(())
         });
 
         // End drawing (swap buffers)
-        methods.add_method_mut("end_drawing", |_, this, ()| Ok(()));
+        methods.add_method_mut("end_drawing", |_, _this, ()| Ok(()));
 
         // Clear background with color
         methods.add_method_mut("clear_background", |_, this, color: LuaColor| {
@@ -124,7 +121,6 @@ impl LuaUserData for LuaRaylib {
         );
 
         // Input - Keyboard
-        // =====================================================================
 
         methods.add_method("is_key_pressed", |_, this, key: String| {
             Ok(this.rl.is_key_pressed(str_to_key(&key)))
@@ -142,9 +138,7 @@ impl LuaUserData for LuaRaylib {
             Ok(this.rl.is_key_up(str_to_key(&key)))
         });
 
-        // =====================================================================
         // Input - Mouse
-        // =====================================================================
 
         methods.add_method("get_mouse_position", |_, this, ()| {
             let pos = this.rl.get_mouse_position();
