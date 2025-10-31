@@ -214,7 +214,7 @@ impl<'l> LuaUserData for LuaRaylib<'l> {
         );
 
         // Exit key configuration
-        methods.add_method_mut("set_exit_key", |_, this, key: i32| {
+        methods.add_method_mut("set_exit_key", |_, _this, key: i32| {
             unsafe {
                 ffi::SetExitKey(key);
             }
@@ -273,6 +273,7 @@ impl<'l> LuaUserData for LuaRaylib<'l> {
 }
 
 // Lua wrapper for RaylibDrawHandle
+#[allow(dead_code)]
 struct LuaDrawHandle<'a> {
     handle: &'a mut RaylibDrawHandle<'a>,
 }
