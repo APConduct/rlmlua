@@ -30,6 +30,8 @@ while not window:should_close() do
         ball_color = rlc.BEIGE
     end
 
+    ball_position = window:get_mouse_position()
+
     window:begin_drawing()
 
     window:clear_background(rlc.RAYWHITE)

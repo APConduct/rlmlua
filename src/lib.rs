@@ -252,7 +252,7 @@ impl<'l> LuaUserData for LuaRaylib<'l> {
 
         methods.add_method("get_mouse_position", |_, this, ()| {
             let pos = this.rl.get_mouse_position();
-            Ok((pos.x, pos.y))
+            Ok(LuaVector2 { x: pos.x, y: pos.y })
         });
 
         methods.add_method("get_mouse_wheel_move", |_, this, ()| {

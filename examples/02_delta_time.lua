@@ -37,6 +37,7 @@ while not window:should_close() do
         frame_circle.x = 0
     end
 
+    -- NOTE: Changing the parameter type for 'is_key_pressed' to a marker (integer) may be a future optimization point
     if window:is_key_pressed("R") then
         delta_circle.x = 0
         frame_circle.x = 0
