@@ -343,6 +343,13 @@ impl<'l> LuaUserData for LuaRaylib<'l> {
         methods.add_method_mut("should_close", |_, this, ()| {
             Ok(this.rl.window_should_close())
         });
+
+        methods.add_method_mut("get_gesture_detected", |_, this, ()| {
+            // Ok(str_to_luagesture(gesture_to_str(
+            //     this.rl.get_gesture_detected(),
+            // )))
+            Ok(LuaGesture::from(this.rl.get_gesture_detected()))
+        });
     }
 }
 
@@ -606,6 +613,71 @@ pub fn str_to_key(s: &str) -> KeyboardKey {
         "RIGHT_ALT" => KeyboardKey::KEY_RIGHT_ALT,
 
         _ => KeyboardKey::KEY_NULL,
+    }
+}
+
+pub fn str_to_gesture(gesture: &str) -> Gesture {
+    match gesture {
+        "TAP" | "tap" | "Tap" => Gesture::GESTURE_TAP,
+        "DOUBLETAP" | "doubletap" | "Doubletap" => Gesture::GESTURE_DOUBLETAP,
+        "HOLD" | "hold" | "Hold" => Gesture::GESTURE_HOLD,
+        "DRAG" | "drag" | "Drag" => Gesture::GESTURE_DRAG,
+        "SWIPE_RIGHT" | "swipe_right" | "SwipeRight" => Gesture::GESTURE_SWIPE_RIGHT,
+        "SWIPE_LEFT" | "swipe_left" | "SwipeLeft" => Gesture::GESTURE_SWIPE_LEFT,
+        "SWIPE_UP" | "swipe_up" | "SwipeUp" => Gesture::GESTURE_SWIPE_UP,
+        "SWIPE_DOWN" | "swipe_down" | "SwipeDown" => Gesture::GESTURE_SWIPE_DOWN,
+        "PINCH_IN" | "pinch_in" | "PinchIn" => Gesture::GESTURE_PINCH_IN,
+        "PINCH_OUT" | "pinch_out" | "PinchOut" => Gesture::GESTURE_PINCH_OUT,
+        _ => Gesture::GESTURE_NONE,
+    }
+}
+
+pub fn gesture_to_str(gesture: Gesture) -> &'static str {
+    match gesture {
+        Gesture::GESTURE_TAP => "TAP",
+        Gesture::GESTURE_DOUBLETAP => "DOUBLETAP",
+        Gesture::GESTURE_HOLD => "HOLD",
+        Gesture::GESTURE_DRAG => "DRAG",
+        Gesture::GESTURE_SWIPE_RIGHT => "SWIPE_RIGHT",
+        Gesture::GESTURE_SWIPE_LEFT => "SWIPE_LEFT",
+        Gesture::GESTURE_SWIPE_UP => "SWIPE_UP",
+        Gesture::GESTURE_SWIPE_DOWN => "SWIPE_DOWN",
+        Gesture::GESTURE_PINCH_IN => "PINCH_IN",
+        Gesture::GESTURE_PINCH_OUT => "PINCH_OUT",
+        Gesture::GESTURE_NONE => "NONE",
+    }
+}
+
+pub fn str_to_luagesture(s: &str) -> LuaGesture {
+    match s {
+        "TAP" | "tap" | "Tap" => LuaGesture::Tap,
+        "DOUBLETAP" | "doubletap" | "DoubleTap" => LuaGesture::DoubleTap,
+        "HOLD" | "hold" | "Hold" => LuaGesture::Hold,
+        "DRAG" | "drag" | "Drag" => LuaGesture::Drag,
+        "SWIPE_RIGHT" | "swipe_right" | "SwipeRight" => LuaGesture::SwipeRight,
+        "SWIPE_LEFT" | "swipe_left" | "SwipeLeft" => LuaGesture::SwipeLeft,
+        "SWIPE_UP" | "swipe_up" | "SwipeUp" => LuaGesture::SwipeUp,
+        "SWIPE_DOWN" | "swipe_down" | "SwipeDown" => LuaGesture::SwipeDown,
+        "PINCH_IN" | "pinch_in" | "PinchIn" => LuaGesture::PinchIn,
+        "PINCH_OUT" | "pinch_out" | "PinchOut" => LuaGesture::PinchOut,
+        "NONE" | "none" | "None" => LuaGesture::None,
+        _ => LuaGesture::None,
+    }
+}
+
+pub fn luagesture_to_str(gesture: LuaGesture) -> &'static str {
+    match gesture {
+        LuaGesture::Tap => "TAP",
+        LuaGesture::DoubleTap => "DOUBLE_TAP",
+        LuaGesture::Hold => "HOLD",
+        LuaGesture::Drag => "DRAG",
+        LuaGesture::SwipeRight => "SWIPE_RIGHT",
+        LuaGesture::SwipeLeft => "SWIPE_LEFT",
+        LuaGesture::SwipeUp => "SWIPE_UP",
+        LuaGesture::SwipeDown => "SWIPE_DOWN",
+        LuaGesture::PinchIn => "PINCH_IN",
+        LuaGesture::PinchOut => "PINCH_OUT",
+        LuaGesture::None => "NONE",
     }
 }
 
@@ -1165,6 +1237,102 @@ impl FromLua for LuaVector3 {
 
 pub fn vector2<'lua>(_lua: &Lua, (x, y): (f32, f32)) -> LuaResult<LuaVector2> {
     Ok(LuaVector2 { x, y })
+}
+
+pub fn vector3<'lua>(_lua: &Lua, (x, y, z): (f32, f32, f32)) -> LuaResult<LuaVector3> {
+    Ok(LuaVector3 { x, y, z })
+}
+
+pub fn gesture<'lua>(_lua: &Lua, _gesture: String) -> LuaResult<LuaGesture> {
+    match _gesture.as_str() {
+        "tap" | "TAP" | "Tap" => Ok(LuaGesture::Tap),
+        "double_tap" | "doubletap" | "DOUBLE_TAP" | "DoubleTap" | "DOUBLETAP" => {
+            Ok(LuaGesture::DoubleTap)
+        }
+        "hold" | "HOLD" | "Hold" => Ok(LuaGesture::Hold),
+        "drag" | "DRAG" | "Drag" => Ok(LuaGesture::Drag),
+        "swipe_right" | "SWIPE_RIGHT" | "SwipeRight" => Ok(LuaGesture::SwipeRight),
+        "swipe_left" | "SWIPE_LEFT" | "SwipeLeft" => Ok(LuaGesture::SwipeLeft),
+        "swipe_up" | "SWIPE_UP" | "SwipeUp" => Ok(LuaGesture::SwipeUp),
+        "swipe_down" | "SWIPE_DOWN" | "SwipeDown" => Ok(LuaGesture::SwipeDown),
+        "pinch_in" | "PINCH_IN" | "PinchIn" => Ok(LuaGesture::PinchIn),
+        "pinch_out" | "PINCH_OUT" | "PinchOut" => Ok(LuaGesture::PinchOut),
+        _ => Ok(LuaGesture::None),
+    }
+}
+
+pub fn gesture_from_str<'lua>(_lua: &Lua, _gesture: &str) -> LuaResult<LuaGesture> {
+    match _gesture {
+        "tap" | "TAP" | "Tap" => Ok(LuaGesture::Tap),
+        "double_tap" | "doubletap" | "DOUBLE_TAP" | "DoubleTap" | "DOUBLETAP" => {
+            Ok(LuaGesture::DoubleTap)
+        }
+        "hold" | "HOLD" | "Hold" => Ok(LuaGesture::Hold),
+        "drag" | "DRAG" | "Drag" => Ok(LuaGesture::Drag),
+        "swipe_right" | "SWIPE_RIGHT" | "SwipeRight" => Ok(LuaGesture::SwipeRight),
+        "swipe_left" | "SWIPE_LEFT" | "SwipeLeft" => Ok(LuaGesture::SwipeLeft),
+        "swipe_up" | "SWIPE_UP" | "SwipeUp" => Ok(LuaGesture::SwipeUp),
+        "swipe_down" | "SWIPE_DOWN" | "SwipeDown" => Ok(LuaGesture::SwipeDown),
+        "pinch_in" | "PINCH_IN" | "PinchIn" => Ok(LuaGesture::PinchIn),
+        "pinch_out" | "PINCH_OUT" | "PinchOut" => Ok(LuaGesture::PinchOut),
+        _ => Ok(LuaGesture::None),
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum LuaGesture {
+    Tap,
+    DoubleTap,
+    Hold,
+    Drag,
+    SwipeRight,
+    SwipeLeft,
+    SwipeUp,
+    SwipeDown,
+    PinchIn,
+    PinchOut,
+    None,
+}
+
+impl From<LuaGesture> for Gesture {
+    fn from(value: LuaGesture) -> Self {
+        match value {
+            LuaGesture::Tap => Gesture::GESTURE_TAP,
+            LuaGesture::DoubleTap => Gesture::GESTURE_DOUBLETAP,
+            LuaGesture::Hold => Gesture::GESTURE_HOLD,
+            LuaGesture::Drag => Gesture::GESTURE_DRAG,
+            LuaGesture::SwipeRight => Gesture::GESTURE_SWIPE_RIGHT,
+            LuaGesture::SwipeLeft => Gesture::GESTURE_SWIPE_LEFT,
+            LuaGesture::SwipeUp => Gesture::GESTURE_SWIPE_UP,
+            LuaGesture::SwipeDown => Gesture::GESTURE_SWIPE_DOWN,
+            LuaGesture::PinchIn => Gesture::GESTURE_PINCH_IN,
+            LuaGesture::PinchOut => Gesture::GESTURE_PINCH_OUT,
+            LuaGesture::None => Gesture::GESTURE_NONE,
+        }
+    }
+}
+
+impl From<Gesture> for LuaGesture {
+    fn from(value: Gesture) -> Self {
+        match value {
+            Gesture::GESTURE_TAP => LuaGesture::Tap,
+            Gesture::GESTURE_DOUBLETAP => LuaGesture::DoubleTap,
+            Gesture::GESTURE_HOLD => LuaGesture::Hold,
+            Gesture::GESTURE_DRAG => LuaGesture::Drag,
+            Gesture::GESTURE_SWIPE_RIGHT => LuaGesture::SwipeRight,
+            Gesture::GESTURE_SWIPE_LEFT => LuaGesture::SwipeLeft,
+            Gesture::GESTURE_SWIPE_UP => LuaGesture::SwipeUp,
+            Gesture::GESTURE_SWIPE_DOWN => LuaGesture::SwipeDown,
+            Gesture::GESTURE_PINCH_IN => LuaGesture::PinchIn,
+            Gesture::GESTURE_PINCH_OUT => LuaGesture::PinchOut,
+            Gesture::GESTURE_NONE => LuaGesture::None,
+        }
+    }
+}
+
+impl LuaUserData for LuaGesture {
+    fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {}
+    fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {}
 }
 
 // Module Entry Point
