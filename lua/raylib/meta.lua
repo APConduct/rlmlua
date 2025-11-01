@@ -186,27 +186,32 @@ function Window:get_mouse_y() end
 
 ---Check if a mouse button has been pressed once (0=left, 1=right, 2=middle)
 ---@param self Window
----@param button integer
+---@param button string
 ---@return boolean
 function Window:is_mouse_button_pressed(button) end
 
 ---Check if a mouse button is being pressed
 ---@param self Window
----@param button integer
+---@param button string
 ---@return boolean
 function Window:is_mouse_button_down(button) end
 
 ---Check if a mouse button has been released once
 ---@param self Window
----@param button integer
+---@param button string
 ---@return boolean
 function Window:is_mouse_button_released(button) end
 
 ---Check if a mouse button is NOT being pressed
 ---@param self Window
----@param button integer
+---@param button string
 ---@return boolean
 function Window:is_mouse_button_up(button) end
+
+---Check if the cursor is hidden
+---@param self Window
+---@return boolean
+function Window:is_cursor_hidden() end
 
 ---Get the width of the screen
 ---@param self Window
@@ -285,6 +290,7 @@ function raylib.draw(window, callback) end
 ---@field LIME Color Lime (0, 255, 0, 255)
 ---@field GOLD Color Gold (255, 201, 0, 255)
 ---@field MAROON Color Maroon (128, 0, 0, 255)
+---@field BEIGE Color Beige (211, 176, 131, 255)
 raylib.colors = {}
 
 ---Key string constants for keyboard input

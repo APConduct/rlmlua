@@ -264,33 +264,35 @@ impl<'l> LuaUserData for LuaRaylib<'l> {
 
         methods.add_method("get_mouse_y", |_, this, ()| Ok(this.rl.get_mouse_y()));
 
-        methods.add_method("is_mouse_button_pressed", |_, this, button: i32| {
-            let mb = int_to_mouse_button(button);
+        methods.add_method("is_mouse_button_pressed", |_, this, button: String| {
+            let mb = str_to_mouse_button(button.as_str());
             Ok(this.rl.is_mouse_button_pressed(mb))
         });
 
-        methods.add_method("is_mouse_button_down", |_, this, button: i32| {
-            let mb = int_to_mouse_button(button);
+        methods.add_method("is_mouse_button_down", |_, this, button: String| {
+            let mb = str_to_mouse_button(button.as_str());
             Ok(this.rl.is_mouse_button_down(mb))
         });
 
-        methods.add_method("is_mouse_button_released", |_, this, button: i32| {
-            let mb = int_to_mouse_button(button);
+        methods.add_method("is_mouse_button_released", |_, this, button: String| {
+            let mb = str_to_mouse_button(button.as_str());
             Ok(this.rl.is_mouse_button_released(mb))
         });
 
-        methods.add_method("is_mouse_button_up", |_, this, button: i32| {
-            let mb = int_to_mouse_button(button);
+        methods.add_method("is_mouse_button_up", |_, this, button: String| {
+            let mb = str_to_mouse_button(button.as_str());
             Ok(this.rl.is_mouse_button_up(mb))
+        });
+
+        methods.add_method("is_cursor_hidden", |_, this, ()| {
+            Ok(this.rl.is_cursor_hidden())
         });
 
         methods.add_method("get_mouse_wheel_move", |_, this, ()| {
             Ok(this.rl.get_mouse_wheel_move())
         });
 
-        // Dr
-        // 
-        // awing - circle with vector
+        // Drawing - circle with vector
         methods.add_method_mut(
             "draw_circle_v",
             |_lua, _this, (center, radius, color): (LuaValue, f32, LuaColor)| {
@@ -506,6 +508,20 @@ impl<'lua> FromLua for LuaColor {
                 message: Some("Expected table {r, g, b, a}".to_string()),
             }),
         }
+    }
+}
+
+pub fn str_to_mouse_button(s: &str) -> MouseButton {
+    match s.to_uppercase().as_str() {
+        "LEFT" => MouseButton::MOUSE_BUTTON_LEFT,
+        "RIGHT" => MouseButton::MOUSE_BUTTON_RIGHT,
+        "MIDDLE" => MouseButton::MOUSE_BUTTON_MIDDLE,
+        "SIDE" => MouseButton::MOUSE_BUTTON_SIDE,
+        "EXTRA" => MouseButton::MOUSE_BUTTON_EXTRA,
+        "FORWARD" => MouseButton::MOUSE_BUTTON_FORWARD,
+        "BACK" => MouseButton::MOUSE_BUTTON_BACK,
+        // Maybe make this safe later
+        _ => MouseButton::MOUSE_BUTTON_LEFT,
     }
 }
 

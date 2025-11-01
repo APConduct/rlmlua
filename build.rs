@@ -233,26 +233,32 @@ fn generate_raylib_definitions() {
         (
             "is_mouse_button_pressed",
             "boolean",
-            "(button: integer)",
+            "(button: string)",
             "Check if a mouse button has been pressed once (0=left, 1=right, 2=middle)",
         ),
         (
             "is_mouse_button_down",
             "boolean",
-            "(button: integer)",
+            "(button: string)",
             "Check if a mouse button is being pressed",
         ),
         (
             "is_mouse_button_released",
             "boolean",
-            "(button: integer)",
+            "(button: string)",
             "Check if a mouse button has been released once",
         ),
         (
             "is_mouse_button_up",
             "boolean",
-            "(button: integer)",
+            "(button: string)",
             "Check if a mouse button is NOT being pressed",
+        ),
+        (
+            "is_cursor_hidden",
+            "boolean",
+            "()",
+            "Check if the cursor is hidden",
         ),
         (
             "get_screen_width",
@@ -370,6 +376,7 @@ fn generate_raylib_definitions() {
     output.push_str("---@field LIME Color Lime (0, 255, 0, 255)\n");
     output.push_str("---@field GOLD Color Gold (255, 201, 0, 255)\n");
     output.push_str("---@field MAROON Color Maroon (128, 0, 0, 255)\n");
+    output.push_str("---@field BEIGE Color Beige (211, 176, 131, 255)\n");
     output.push_str("raylib.colors = {}\n\n");
 
     // Key constants documentation
