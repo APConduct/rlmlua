@@ -171,7 +171,7 @@ function Window:is_key_up(key) end
 
 ---Get mouse position X and Y
 ---@param self Window
----@return number, number
+---@return Vector2
 function Window:get_mouse_position() end
 
 ---Get mouse position X

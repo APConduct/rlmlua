@@ -224,7 +224,7 @@ fn generate_raylib_definitions() {
         // Input - Mouse
         (
             "get_mouse_position",
-            "number, number",
+            "Vector2",
             "()",
             "Get mouse position X and Y",
         ),

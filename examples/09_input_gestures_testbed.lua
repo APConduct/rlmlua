@@ -119,10 +119,15 @@ while not window:should_close() do
     end
 
     local current_angle_radians = ((current_angle_degrees + 90.0) * math.pi / 180)
-    local final_vector = rlm.vec2((angle_length * math.sin(current_angle_radians)) + protractor_position.x,
+    final_vector = rlm.vec2((angle_length * math.sin(current_angle_radians)) + protractor_position.x,
         (angle_length * math.cos(current_angle_radians)) + protractor_position.y)
 
-    local touch_position = {}
+    local touch_position = {
+        -- This is a propogation to ensure that 'MAX_TOUCH_COUNT' is used
+        __len = function(self)
+            return MAX_TOUCH_COUNT
+        end
+    }
     local mouse_position = rlm.vec2(0, 0)
     if current_gesture ~= rl.GESTURE_NONE then
         if touch_count ~= 0 then
