@@ -24,8 +24,8 @@ window:set_target_fps(60)
 
 while not window:should_close() do
     last_gesture = current_gesture
-    current_gesture = rl.get_gesture_detected()
-    touch_position = rl.get_touch_position(0)
+    current_gesture = window:get_gesture_detected()
+    touch_position = window:get_touch_position(0)
 
     if rl.check_collision_point_rec(touch_position, touch_area) and (current_gesture ~= rl.GESTURE_NONE) then
         if current_gesture ~= last_gesture then
