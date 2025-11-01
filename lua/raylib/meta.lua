@@ -184,7 +184,7 @@ function Window:get_mouse_x() end
 ---@return number
 function Window:get_mouse_y() end
 
----Check if a mouse button has been pressed once (0=left, 1=right, 2=middle)
+---Check if a mouse button has been pressed once ("LEFT"=left, "RIGHT"=right, "MIDDLE"=middle, "EXTRA"=extra, "BACK"=back, "FORWARD"=forward)
 ---@param self Window
 ---@param button string
 ---@return boolean

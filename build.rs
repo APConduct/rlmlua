@@ -234,7 +234,7 @@ fn generate_raylib_definitions() {
             "is_mouse_button_pressed",
             "boolean",
             "(button: string)",
-            "Check if a mouse button has been pressed once (0=left, 1=right, 2=middle)",
+            "Check if a mouse button has been pressed once (\"LEFT\"=left, \"RIGHT\"=right, \"MIDDLE\"=middle, \"EXTRA\"=extra, \"BACK\"=back, \"FORWARD\"=forward)",
         ),
         (
             "is_mouse_button_down",
