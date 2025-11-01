@@ -22,7 +22,7 @@ while not window:should_close() do
     window:draw_rectangle(screen_width / 2 - 40, box_position_y, 80, 80, rlc.MAROON)
 
     window:draw_text("Use mouse wheel to move the cube up and down!", 10, 10, 20, rlc.GRAY)
-    window:draw_text(string.format("Box position Y: %03i", box_position_y), 10, 40, 20, rlc.LIGHTGRAY)
+    window:draw_text(string.format("Box position Y: %03i", math.floor(box_position_y)), 10, 40, 20, rlc.LIGHTGRAY)
 
     window:end_drawing()
 end
