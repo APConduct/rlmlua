@@ -108,7 +108,7 @@ fn generate_raylib_definitions() {
     output.push_str("---@field PinchOut Gesture\n");
     output.push_str("---@field DoubleTap Gesture\n");
     output.push_str("---@field Tap Gesture\n");
-    output.push_str("---@field Hold Gesture\n");
+    output.push_str("---@field Hold Gesture\n\n");
 
     // Window class
     output.push_str("---Raylib window handle\n");

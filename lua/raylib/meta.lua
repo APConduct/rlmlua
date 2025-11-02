@@ -37,6 +37,7 @@ local raylib = {}
 ---@field DoubleTap Gesture
 ---@field Tap Gesture
 ---@field Hold Gesture
+
 ---Raylib window handle
 ---@class Window
 local Window = {}
