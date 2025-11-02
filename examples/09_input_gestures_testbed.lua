@@ -5,9 +5,9 @@ local rlc = rl.colors
 local GESTURE_LOG_SIZE = 20
 local MAX_TOUCH_COUNT = 32
 
----@type fun(gesture: Gesture): string
+---@type fun(gesture: Gesture|integer): string
 local get_gesture_name
----@type fun(gesture: Gesture): Color
+---@type fun(gesture: Gesture|integer): Color
 local get_gesture_color
 
 local screen_width = 800

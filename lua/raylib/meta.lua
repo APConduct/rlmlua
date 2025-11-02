@@ -301,7 +301,7 @@ function Window:close() end
 
 ---Get the detected gesture
 ---@param self Window
----@return Gesture
+---@return Gesture|integer
 function Window:get_gesture_detected() end
 
 ---Get the angle of the drag gesture

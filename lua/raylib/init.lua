@@ -17,27 +17,27 @@ rl.check_collision_point_rec = raylib_core.check_collision_point_rec
 
 rl.fade = raylib_core.fade
 
----@type Gesture
+---@type Gesture|integer
 rl.GESTURE_NONE = raylib_core.GESTURE_NONE
----@type Gesture
+---@type Gesture|integer
 rl.GESTURE_DRAG = raylib_core.GESTURE_DRAG
----@type Gesture
+---@type Gesture|integer
 rl.GESTURE_PINCH_IN = raylib_core.GESTURE_PINCH_IN
----@type Gesture
+---@type Gesture|integer
 rl.GESTURE_PINCH_OUT = raylib_core.GESTURE_PINCH_OUT
----@type Gesture
+---@type Gesture|integer
 rl.GESTURE_SWIPE_RIGHT = raylib_core.GESTURE_SWIPE_RIGHT
----@type Gesture
+---@type Gesture|integer
 rl.GESTURE_SWIPE_LEFT = raylib_core.GESTURE_SWIPE_LEFT
----@type Gesture
+---@type Gesture|integer
 rl.GESTURE_SWIPE_UP = raylib_core.GESTURE_SWIPE_UP
----@type Gesture
+---@type Gesture|integer
 rl.GESTURE_SWIPE_DOWN = raylib_core.GESTURE_SWIPE_DOWN
----@type Gesture
+---@type Gesture|integer
 rl.GESTURE_HOLD = raylib_core.GESTURE_HOLD
----@type Gesture
+---@type Gesture|integer
 rl.GESTURE_TAP = raylib_core.GESTURE_TAP
----@type Gesture
+---@type Gesture|integer
 rl.GESTURE_DOUBLETAP = raylib_core.GESTURE_DOUBLETAP
 
 -- Helper: Safe drawing wrapper with automatic begin/end

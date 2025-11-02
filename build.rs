@@ -337,7 +337,7 @@ fn generate_raylib_definitions() {
         ("close", "nil", "", "Close the window"),
         (
             "get_gesture_detected",
-            "Gesture",
+            "Gesture|integer",
             "",
             "Get the detected gesture",
         ),
@@ -367,7 +367,7 @@ fn generate_raylib_definitions() {
         ),
     ];
 
-    let other_functions: Vec<(&str, &str, &str, &'static str)> = vec![];
+    let _other_functions: Vec<(&str, &str, &str, &'static str)> = vec![];
 
     for (name, ret_type, params, desc) in window_methods {
         output.push_str(&format!("---{}\n", desc));

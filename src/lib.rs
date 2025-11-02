@@ -1,5 +1,5 @@
 use mlua::prelude::*;
-use raylib::collision::*;
+// use raylib::collision::*;
 use raylib::prelude::*;
 use std::cell::RefCell;
 
@@ -1266,7 +1266,7 @@ impl From<Vector2> for LuaVector2 {
 }
 
 impl<'lua> FromLua for LuaVector2 {
-    fn from_lua(value: LuaValue, lua: &Lua) -> LuaResult<Self> {
+    fn from_lua(value: LuaValue, _lua: &Lua) -> LuaResult<Self> {
         match value {
             LuaValue::Table(table) => {
                 let x = table.get("x")?;
@@ -1436,7 +1436,7 @@ impl From<LuaRectangle> for raylib::ffi::Rectangle {
 }
 
 impl<'lua> FromLua for LuaRectangle {
-    fn from_lua(value: LuaValue, lua: &Lua) -> LuaResult<Self> {
+    fn from_lua(value: LuaValue, _lua: &Lua) -> LuaResult<Self> {
         match value {
             LuaValue::Table(table) => {
                 let x: f32 = table.get("x")?;
@@ -1483,7 +1483,9 @@ impl LuaUserData for LuaRectangle {
         fields.add_field_method_get("width", |_, this| Ok(this.width));
         fields.add_field_method_get("height", |_, this| Ok(this.height));
     }
-    fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {}
+    fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
+        methods.add_method("__eq", |_, this, other: LuaRectangle| Ok(*this == other));
+    }
 }
 
 pub fn vector2<'lua>(_lua: &Lua, (x, y): (f32, f32)) -> LuaResult<LuaVector2> {
