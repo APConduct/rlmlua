@@ -6,7 +6,7 @@ local GESTURE_LOG_SIZE = 20
 local MAX_TOUCH_COUNT = 32
 
 ---get text string for gesture value
----@param gesture integer
+---@param gesture integer|Gesture
 ---@return string
 local function get_gesture_name(gesture)
     if gesture == 0 then
@@ -37,7 +37,7 @@ local function get_gesture_name(gesture)
 end
 
 ---get color for gesture value
----@param gesture integer
+---@param gesture integer|Gesture
 ---@return Color
 local function get_gesture_color(gesture)
     if gesture == 0 then
