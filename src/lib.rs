@@ -174,12 +174,42 @@ impl<'l> LuaUserData for LuaRaylib<'l> {
         );
 
         methods.add_method_mut(
+            "draw_triangle",
+            |_, _this, (v1, v2, v3, color): (LuaVector2, LuaVector2, LuaVector2, LuaColor)| {
+                DRAW_HANDLE.with(|cell| {
+                    if let Some(d) = *cell.borrow() {
+                        unsafe {
+                            (*d).draw_triangle(v1, v2, v3, <LuaColor as Into<Color>>::into(color));
+                        }
+                    }
+                });
+                Ok(())
+            },
+        );
+
+        methods.add_method_mut(
             "draw_line",
             |_, _this, (x1, y1, x2, y2, color): (i32, i32, i32, i32, LuaColor)| {
                 DRAW_HANDLE.with(|cell| {
                     if let Some(d) = *cell.borrow() {
                         unsafe {
                             (*d).draw_line(x1, y1, x2, y2, <LuaColor as Into<Color>>::into(color));
+                        }
+                    }
+                });
+                Ok(())
+            },
+        );
+
+        methods.add_method_mut(
+            "draw_line_ex",
+            |_, _this, (start_pos, end_pos, thick, color): (LuaVector2, LuaVector2, f32, LuaColor)| {
+                DRAW_HANDLE.with(|cell| {
+                    if let Some(d) = *cell.borrow() {
+                        unsafe {
+                            (*d).draw_line_ex(
+                                start_pos, end_pos, thick, <LuaColor as Into<Color>>::into(color)
+                            );
                         }
                     }
                 });
@@ -1004,6 +1034,15 @@ fn register_colors(lua: &Lua, exports: &LuaTable) -> LuaResult<()> {
             r: 200,
             g: 122,
             b: 255,
+            a: 255,
+        },
+    )?;
+    colors.set(
+        "VIOLET",
+        LuaColor {
+            r: 135,
+            g: 60,
+            b: 190,
             a: 255,
         },
     )?;

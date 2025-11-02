@@ -111,6 +111,15 @@ function Window:draw_rectangle(x, y, width, height, color) end
 ---@return nil
 function Window:draw_rectangle_rec(rect, color) end
 
+---Draw a color-filled triangle
+---@param self Window
+---@param v1 Vector2
+---@param v2 Vector2
+---@param v3 Vector2
+---@param color Color
+---@return nil
+function Window:draw_triangle(v1, v2, v3, color) end
+
 ---Draw a color-filled circle
 ---@param self Window
 ---@param x integer
@@ -129,6 +138,15 @@ function Window:draw_circle(x, y, radius, color) end
 ---@param color Color
 ---@return nil
 function Window:draw_line(x1, y1, x2, y2, color) end
+
+---Draw line with thickness
+---@param self Window
+---@param start_pos Vector2
+---@param end_pos Vector2
+---@param thick number
+---@param color Color
+---@return nil
+function Window:draw_line_ex(start_pos, end_pos, thick, color) end
 
 ---Draw pixel
 ---@param self Window
@@ -343,6 +361,7 @@ function raylib.draw(window, callback) end
 ---@field SKYBLUE Color Sky Blue (102, 191, 255, 255)
 ---@field ORANGE Color Orange (255, 161, 0, 255)
 ---@field PURPLE Color Purple (200, 122, 255, 255)
+---@field VIOLET Color Violet (135, 60, 190, 255)
 ---@field RAYWHITE Color Ray White (245, 245, 245, 255)
 ---@field DARKBLUE Color Dark Blue (0, 0, 128, 255)
 ---@field LIME Color Lime (0, 255, 0, 255)

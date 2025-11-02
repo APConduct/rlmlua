@@ -158,9 +158,6 @@ while not window:should_close() do
             return value_if_false
         end
     end
-
-    local result = ternary(a == b, "yes", "no")
-
     window:draw_rectangle(last_gesture_position.x + 20, last_gesture_position.y, 20, 20,
         ternary(last_gesture == rl.GESTURE_SWIPE_UP, rlc.RED, rlc.LIGHTGRAY))
     window:draw_rectangle(last_gesture_position.x, last_gesture_position.y + 20, 20, 20,

@@ -181,6 +181,12 @@ fn generate_raylib_definitions() {
             "Draw a color-filled rectangle",
         ),
         (
+            "draw_triangle",
+            "nil",
+            "(v1: Vector2, v2: Vector2, v3: Vector2, color: Color)",
+            "Draw a color-filled triangle",
+        ),
+        (
             "draw_circle",
             "nil",
             "(x: integer, y: integer, radius: number, color: Color)",
@@ -191,6 +197,12 @@ fn generate_raylib_definitions() {
             "nil",
             "(x1: integer, y1: integer, x2: integer, y2: integer, color: Color)",
             "Draw line",
+        ),
+        (
+            "draw_line_ex",
+            "nil",
+            "(start_pos: Vector2, end_pos: Vector2, thick: number, color: Color)",
+            "Draw line with thickness",
         ),
         (
             "draw_pixel",
@@ -427,6 +439,7 @@ fn generate_raylib_definitions() {
     output.push_str("---@field SKYBLUE Color Sky Blue (102, 191, 255, 255)\n");
     output.push_str("---@field ORANGE Color Orange (255, 161, 0, 255)\n");
     output.push_str("---@field PURPLE Color Purple (200, 122, 255, 255)\n");
+    output.push_str("---@field VIOLET Color Violet (135, 60, 190, 255)\n");
     output.push_str("---@field RAYWHITE Color Ray White (245, 245, 245, 255)\n");
     output.push_str("---@field DARKBLUE Color Dark Blue (0, 0, 128, 255)\n");
     output.push_str("---@field LIME Color Lime (0, 255, 0, 255)\n");
