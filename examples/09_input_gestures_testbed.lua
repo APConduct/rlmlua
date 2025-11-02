@@ -50,7 +50,6 @@ window:set_target_fps(60)
 while not window:should_close() do
     local i
     local ii
-    ---@type integer
     local current_gesture = window:get_gesture_detected()
     local current_drag_degrees = window:get_gesture_pitch_angle()
     local current_pinch_degrees = window:get_gesture_pinch_angle()
