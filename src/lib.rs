@@ -435,7 +435,7 @@ impl<'l> LuaUserData for LuaRaylib<'l> {
             Ok(LuaGesture::from(this.rl.get_gesture_detected()))
         });
 
-        methods.add_method_mut("get_gesture_pitch_angle", |_, this, ()| {
+        methods.add_method_mut("get_gesture_pinch_angle", |_, this, ()| {
             Ok(this.rl.get_gesture_pinch_angle())
         });
 
@@ -1628,8 +1628,47 @@ impl LuaUserData for LuaGesture {
         methods.add_meta_method(mlua::MetaMethod::Eq, |_, this, other: LuaGesture| {
             Ok(*this == other)
         });
+
+        // Add comparison operators for integers
+        methods.add_meta_method(mlua::MetaMethod::Lt, |_, this, other: mlua::Value| {
+            let this_val = gesture_to_int(*this);
+            match other {
+                mlua::Value::Integer(i) => Ok(this_val < i as i32),
+                mlua::Value::Number(n) => Ok((this_val as f64) < n),
+                _ => Ok(false),
+            }
+        });
+
+        methods.add_meta_method(mlua::MetaMethod::Le, |_, this, other: mlua::Value| {
+            let this_val = gesture_to_int(*this);
+            match other {
+                mlua::Value::Integer(i) => Ok(this_val <= i as i32),
+                mlua::Value::Number(n) => Ok((this_val as f64) <= n),
+                _ => Ok(false),
+            }
+        });
+
+        // Add method to get integer value
+        methods.add_method("to_int", |_, this, ()| Ok(gesture_to_int(*this)));
     }
     fn add_fields<F: LuaUserDataFields<Self>>(_fields: &mut F) {}
+}
+
+// Helper function to convert LuaGesture to integer value
+fn gesture_to_int(gesture: LuaGesture) -> i32 {
+    match gesture {
+        LuaGesture::None => 0,
+        LuaGesture::Tap => 1,
+        LuaGesture::DoubleTap => 2,
+        LuaGesture::Hold => 4,
+        LuaGesture::Drag => 8,
+        LuaGesture::SwipeRight => 16,
+        LuaGesture::SwipeLeft => 32,
+        LuaGesture::SwipeUp => 64,
+        LuaGesture::SwipeDown => 128,
+        LuaGesture::PinchIn => 256,
+        LuaGesture::PinchOut => 512,
+    }
 }
 
 // Module Entry Point

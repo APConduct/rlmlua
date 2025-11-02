@@ -5,10 +5,67 @@ local rlc = rl.colors
 local GESTURE_LOG_SIZE = 20
 local MAX_TOUCH_COUNT = 32
 
----@type fun(gesture: Gesture|integer): string
-local get_gesture_name
----@type fun(gesture: Gesture|integer): Color
-local get_gesture_color
+---get text string for gesture value
+---@param gesture integer
+---@return string
+local function get_gesture_name(gesture)
+    if gesture == 0 then
+        return "None"
+    elseif gesture == 1 then
+        return "Tap"
+    elseif gesture == 2 then
+        return "Double Tap"
+    elseif gesture == 3 then
+        return "Hold"
+    elseif gesture == 4 then
+        return "Drag"
+    elseif gesture == 5 then
+        return "Swipe Right"
+    elseif gesture == 6 then
+        return "Swipe Left"
+    elseif gesture == 7 then
+        return "Swipe Up"
+    elseif gesture == 8 then
+        return "Swipe Down"
+    elseif gesture == 9 then
+        return "Pinch In"
+    elseif gesture == 10 then
+        return "Pinch Out"
+    else
+        return "Unknown"
+    end
+end
+
+---get color for gesture value
+---@param gesture integer
+---@return Color
+local function get_gesture_color(gesture)
+    if gesture == 0 then
+        return rlc.BLACK
+    elseif gesture == 1 then
+        return rlc.BLUE
+    elseif gesture == 2 then
+        return rlc.SKYBLUE
+    elseif gesture == 4 then
+        return rlc.BLACK
+    elseif gesture == 8 then
+        return rlc.LIME
+    elseif gesture == 16 then
+        return rlc.RED
+    elseif gesture == 32 then
+        return rlc.RED
+    elseif gesture == 64 then
+        return rlc.RED
+    elseif gesture == 128 then
+        return rlc.RED
+    elseif gesture == 256 then
+        return rlc.VIOLET
+    elseif gesture == 512 then
+        return rlc.ORANGE
+    else
+        return rlc.BLACK
+    end
+end
 
 local screen_width = 800
 local screen_height = 450
@@ -171,7 +228,7 @@ while not window:should_close() do
     window:draw_ring(rlm.vec2(last_gesture_position.x + 103, last_gesture_position.y + 16), 6.0, 11.0, 0.0, 360.0, 0,
         ternary(last_gesture == rl.GESTURE_DRAG, rlc.LIME, rlc.LIGHTGRAY))
     window:draw_circle(last_gesture_position.x + 80, last_gesture_position.y + 43, 10,
-        ternary(last_gesture == rl.GESTURE_DOUBLETAP, rlc.SKYBLUE))
+        ternary(last_gesture == rl.GESTURE_DOUBLETAP, rlc.SKYBLUE, rlc.LIGHTGRAY))
     window:draw_circle(last_gesture_position.x + 103, last_gesture_position.y + 43, 10,
         ternary(last_gesture == rl.GESTURE_DOUBLETAP, rlc.SKYBLUE, rlc.LIGHTGRAY))
     window:draw_triangle(rlm.vec2(last_gesture_position.x + 122, last_gesture_position.y + 16),
@@ -282,67 +339,3 @@ while not window:should_close() do
     window:end_drawing()
 end
 window:close()
-
-
----get text string for gesture value
----@param gesture integer
----@return string
-local get_gesture_name = function(gesture)
-    if gesture == 0 then
-        return "None"
-    elseif gesture == 1 then
-        return "Tap"
-    elseif gesture == 2 then
-        return "Double Tap"
-    elseif gesture == 3 then
-        return "Hold"
-    elseif gesture == 4 then
-        return "Drag"
-    elseif gesture == 5 then
-        return "Swipe Right"
-    elseif gesture == 6 then
-        return "Swipe Left"
-    elseif gesture == 7 then
-        return "Swipe Up"
-    elseif gesture == 8 then
-        return "Swipe Down"
-    elseif gesture == 9 then
-        return "Pinch In"
-    elseif gesture == 10 then
-        return "Pinch Out"
-    else
-        return "Unknown"
-    end
-end
-
-
----get color for gesture value
----@param gesture integer
----@return Color
-local get_gesture_color = function(gesture)
-    if gesture == 0 then
-        return rlc.BLACK
-    elseif gesture == 1 then
-        return rlc.BLUE
-    elseif gesture == 2 then
-        return rlc.SKYBLUE
-    elseif gesture == 4 then
-        return rlc.BLACK
-    elseif gesture == 8 then
-        return rlc.LIME
-    elseif gesture == 16 then
-        return rlc.RED
-    elseif gesture == 32 then
-        return rlc.RED
-    elseif gesture == 64 then
-        return rlc.RED
-    elseif gesture == 128 then
-        return rlc.RED
-    elseif gesture == 256 then
-        return rlc.VIOLET
-    elseif gesture == 512 then
-        return rlc.ORANGE
-    else
-        return rlc.BLACK
-    end
-end
