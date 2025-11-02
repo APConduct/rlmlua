@@ -1,4 +1,5 @@
 use mlua::prelude::*;
+use raylib::collision::*;
 use raylib::prelude::*;
 use std::cell::RefCell;
 
@@ -773,7 +774,7 @@ fn check_collision_point_rec(
     _lua: &Lua,
     (point, rec): (LuaVector2, LuaRectangle),
 ) -> LuaResult<bool> {
-    Ok(unsafe { raylib::ffi::CheckCollisionPointRec(point.into(), rec.into()) })
+    Ok(Rectangle::from(rec).check_collision_point_rec(point))
 }
 
 impl IntoLua for LuaColor {
