@@ -89,15 +89,15 @@ while not window:should_close() do
 
     for i = 1, gesture_count do
         if i % 2 == 0 then
-            window:draw_rectangle(10, 30 + 20 * i, 200, 20, rl.fade(rlc.LIGHTGRAY, 0.5))
+            window:draw_rectangle(10, 30 + 20 * (i - 1), 200, 20, rl.fade(rlc.LIGHTGRAY, 0.5))
         else
-            window:draw_rectangle(10, 30 + 20 * i, 200, 20, rl.fade(rlc.LIGHTGRAY, 0.3))
+            window:draw_rectangle(10, 30 + 20 * (i - 1), 200, 20, rl.fade(rlc.LIGHTGRAY, 0.3))
         end
 
         if i < gesture_count then
-            window:draw_text(gesture_strings[i], 35, 36 + 20 * i, 10, rlc.DARKGRAY)
+            window:draw_text(gesture_strings[i], 35, 36 + 20 * (i - 1), 10, rlc.DARKGRAY)
         else
-            window:draw_text(gesture_strings[i], 35, 36 + 20 * i, 10, rlc.MAROON)
+            window:draw_text(gesture_strings[i], 35, 36 + 20 * (i - 1), 10, rlc.MAROON)
         end
     end
 
