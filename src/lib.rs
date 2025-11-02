@@ -1504,9 +1504,42 @@ impl From<Gesture> for LuaGesture {
     }
 }
 
+impl<'lua> FromLua for LuaGesture {
+    fn from_lua(value: LuaValue, _lua: &Lua) -> LuaResult<Self> {
+        match value {
+            LuaValue::UserData(ud) => ud.borrow::<LuaGesture>().map(|g| *g),
+            _ => Err(LuaError::FromLuaConversionError {
+                from: value.type_name(),
+                to: "LuaGesture".to_string(),
+                message: Some("expected LuaGesture userdata".to_string()),
+            }),
+        }
+    }
+}
+
 impl LuaUserData for LuaGesture {
-    fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {}
-    fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {}
+    fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
+        methods.add_meta_method(mlua::MetaMethod::ToString, |_, this, ()| {
+            Ok(match this {
+                LuaGesture::Tap => "GESTURE_TAP",
+                LuaGesture::DoubleTap => "GESTURE_DOUBLETAP",
+                LuaGesture::Hold => "GESTURE_HOLD",
+                LuaGesture::Drag => "GESTURE_DRAG",
+                LuaGesture::SwipeRight => "GESTURE_SWIPE_RIGHT",
+                LuaGesture::SwipeLeft => "GESTURE_SWIPE_LEFT",
+                LuaGesture::SwipeUp => "GESTURE_SWIPE_UP",
+                LuaGesture::SwipeDown => "GESTURE_SWIPE_DOWN",
+                LuaGesture::PinchIn => "GESTURE_PINCH_IN",
+                LuaGesture::PinchOut => "GESTURE_PINCH_OUT",
+                LuaGesture::None => "GESTURE_NONE",
+            })
+        });
+
+        methods.add_meta_method(mlua::MetaMethod::Eq, |_, this, other: LuaGesture| {
+            Ok(*this == other)
+        });
+    }
+    fn add_fields<F: LuaUserDataFields<Self>>(_fields: &mut F) {}
 }
 
 // Module Entry Point

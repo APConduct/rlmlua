@@ -1,3 +1,18 @@
+--[[
+    raylib [core] example - input gestures (Lua translation)
+
+    NOTE: On desktop systems, gestures are detected using mouse input:
+    - Click and drag to generate DRAG gestures
+    - Click to generate TAP gestures
+    - Double-click for DOUBLETAP gestures
+    - Hold mouse button for HOLD gestures
+    - Fast swipes in different directions for SWIPE gestures
+
+    On mobile/tablet devices, use touch input for natural gesture detection.
+
+    This example has been ported from the original raylib C example.
+--]]
+
 local MAX_GESTURE_STRINGS = 20
 
 
@@ -74,9 +89,15 @@ while not window:should_close() do
 
     for i = 1, gesture_count do
         if i % 2 == 0 then
-            window:draw_rectangle(10, 30 + 20 * i, 200, 20, rl.fade(rlc.GRAY, 0.5))
+            window:draw_rectangle(10, 30 + 20 * i, 200, 20, rl.fade(rlc.LIGHTGRAY, 0.5))
         else
             window:draw_rectangle(10, 30 + 20 * i, 200, 20, rl.fade(rlc.LIGHTGRAY, 0.3))
+        end
+
+        if i < gesture_count then
+            window:draw_text(gesture_strings[i], 35, 36 + 20 * i, 10, rlc.DARKGRAY)
+        else
+            window:draw_text(gesture_strings[i], 35, 36 + 20 * i, 10, rlc.MAROON)
         end
     end
 
