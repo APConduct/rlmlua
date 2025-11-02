@@ -23,6 +23,10 @@ pub fn close_window() {
 
 impl<'l> LuaUserData for LuaRaylib<'l> {
     fn add_methods<'lua, M: LuaUserDataMethods<Self>>(methods: &mut M) {
+        methods.add_method_mut("get_random_value", |_, this, (min, max): (i32, i32)| {
+            Ok(this.rl.get_random_value::<i32>(min..max))
+        });
+
         methods.add_method_mut("should_close", |_, this, ()| {
             Ok(this.rl.window_should_close())
         });
