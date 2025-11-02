@@ -68,7 +68,9 @@ while not window:should_close() do
     window:clear_background(rlc.RAYWHITE)
 
     window:draw_rectangle_rec(touch_area, rlc.GRAY)
-    window:draw_rectangle(225, 15, screen_width - 240, screen_height - 40, 20, rl.fade(rlc.GRAY, 0.5))
+    window:draw_rectangle(225, 15, screen_width - 240, screen_height - 30, rlc.RAYWHITE)
+
+    window:draw_text("GESTURE TEST AREA", screen_width - 270, screen_height - 40, 20, rl.fade(rlc.GRAY, 0.5))
 
     for i = 1, gesture_count do
         if i % 2 == 0 then

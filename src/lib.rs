@@ -514,9 +514,31 @@ pub struct LuaColor {
     a: u8,
 }
 
+impl From<raylib::ffi::Color> for LuaColor {
+    fn from(value: raylib::ffi::Color) -> Self {
+        LuaColor {
+            r: value.r,
+            g: value.g,
+            b: value.b,
+            a: value.a,
+        }
+    }
+}
+
 impl From<LuaColor> for Color {
     fn from(value: LuaColor) -> Self {
         Color::new(value.r, value.g, value.b, value.a)
+    }
+}
+
+impl From<LuaColor> for raylib::ffi::Color {
+    fn from(value: LuaColor) -> Self {
+        raylib::ffi::Color {
+            r: value.r,
+            g: value.g,
+            b: value.b,
+            a: value.a,
+        }
     }
 }
 
@@ -739,6 +761,12 @@ fn color(_lua: &Lua, (r, g, b, a): (u8, u8, u8, Option<u8>)) -> LuaResult<LuaCol
         b,
         a: a.unwrap_or(255),
     })
+}
+
+fn fade(_lua: &Lua, (color, alpha): (LuaColor, u8)) -> LuaResult<LuaColor> {
+    // use raylib::ffi::Fade;
+    let faded_color = unsafe { raylib::ffi::Fade(color.into(), alpha as f32) };
+    Ok(faded_color.into())
 }
 
 fn check_collision_point_rec(
@@ -1461,6 +1489,7 @@ fn raylib_lua(lua: &Lua) -> LuaResult<LuaTable> {
         "check_collision_point_rec",
         lua.create_function(check_collision_point_rec)?,
     )?;
+    exports.set("fade", lua.create_function(fade)?)?;
 
     // Register color constants
     register_colors(lua, &exports)?;

@@ -12,6 +12,12 @@ rl.colors = raylib_core.colors
 rl.Vector2 = raylib_core.Vector2
 rl.Vector3 = raylib_core.Vector3
 
+---@type fun(point: Vector2, rect: Rectangle): boolean
+rl.check_collision_point_rec = raylib_core.check_collision_point_rec
+
+---@type fun(color: Color, alpha: number): Color
+rl.fade = raylib_core.fade
+
 ---@type Gesture
 rl.GESTURE_NONE = raylib_core.GESTURE_NONE
 ---@type Gesture
