@@ -143,6 +143,23 @@ impl<'l> LuaUserData for LuaRaylib<'l> {
         );
 
         methods.add_method_mut(
+            "draw_rectangle_rec",
+            |_, _this, (rect, color): (LuaRectangle, LuaColor)| {
+                DRAW_HANDLE.with(|cell| {
+                    if let Some(d) = *cell.borrow() {
+                        unsafe {
+                            (*d).draw_rectangle_rec(
+                                <LuaRectangle as Into<Rectangle>>::into(rect),
+                                <LuaColor as Into<Color>>::into(color),
+                            );
+                        }
+                    }
+                });
+                Ok(())
+            },
+        );
+
+        methods.add_method_mut(
             "draw_circle",
             |_, _this, (x, y, radius, color): (i32, i32, f32, LuaColor)| {
                 DRAW_HANDLE.with(|cell| {
@@ -1165,17 +1182,21 @@ impl From<Vector2> for LuaVector2 {
 }
 
 impl<'lua> FromLua for LuaVector2 {
-    fn from_lua(value: LuaValue, _lua: &Lua) -> LuaResult<Self> {
+    fn from_lua(value: LuaValue, lua: &Lua) -> LuaResult<Self> {
         match value {
             LuaValue::Table(table) => {
                 let x = table.get("x")?;
                 let y = table.get("y")?;
                 Ok(LuaVector2 { x, y })
             }
+            LuaValue::UserData(ud) => {
+                // Try to extract LuaVector2 from userdata
+                ud.borrow::<LuaVector2>().map(|v| *v)
+            }
             _ => Err(LuaError::FromLuaConversionError {
                 from: value.type_name(),
                 to: "LuaVector2".to_string(),
-                message: None,
+                message: Some("expected table with x,y fields or Vector2 userdata".to_string()),
             }),
         }
     }
@@ -1331,7 +1352,7 @@ impl From<LuaRectangle> for raylib::ffi::Rectangle {
 }
 
 impl<'lua> FromLua for LuaRectangle {
-    fn from_lua(value: LuaValue, _lua: &Lua) -> LuaResult<Self> {
+    fn from_lua(value: LuaValue, lua: &Lua) -> LuaResult<Self> {
         match value {
             LuaValue::Table(table) => {
                 let x: f32 = table.get("x")?;
@@ -1345,10 +1366,16 @@ impl<'lua> FromLua for LuaRectangle {
                     height,
                 })
             }
+            LuaValue::UserData(ud) => {
+                // Try to extract LuaRectangle from userdata
+                ud.borrow::<LuaRectangle>().map(|r| *r)
+            }
             _ => Err(LuaError::FromLuaConversionError {
                 from: value.type_name(),
                 to: "LuaRectangle".to_string(),
-                message: None,
+                message: Some(
+                    "expected table with x,y,width,height fields or Rectangle userdata".to_string(),
+                ),
             }),
         }
     }
@@ -1366,7 +1393,12 @@ impl LuaRectangle {
 }
 
 impl LuaUserData for LuaRectangle {
-    fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {}
+    fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {
+        fields.add_field_method_get("x", |_, this| Ok(this.x));
+        fields.add_field_method_get("y", |_, this| Ok(this.y));
+        fields.add_field_method_get("width", |_, this| Ok(this.width));
+        fields.add_field_method_get("height", |_, this| Ok(this.height));
+    }
     fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {}
 }
 
@@ -1491,6 +1523,11 @@ fn raylib_lua(lua: &Lua) -> LuaResult<LuaTable> {
         lua.create_function(check_collision_point_rec)?,
     )?;
     exports.set("fade", lua.create_function(fade)?)?;
+
+    // Helper functions (also available in rlm_lua for compatibility)
+    exports.set("vec2", lua.create_function(vector2)?)?;
+    exports.set("vec3", lua.create_function(vector3)?)?;
+    exports.set("rect", lua.create_function(rect)?)?;
 
     // Register color constants
     register_colors(lua, &exports)?;
