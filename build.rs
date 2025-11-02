@@ -175,6 +175,12 @@ fn generate_raylib_definitions() {
             "Draw a color-filled rectangle",
         ),
         (
+            "draw_rectangle_rec",
+            "nil",
+            "(rect: Rectangle, color: Color)",
+            "Draw a color-filled rectangle",
+        ),
+        (
             "draw_circle",
             "nil",
             "(x: integer, y: integer, radius: number, color: Color)",
@@ -316,6 +322,12 @@ fn generate_raylib_definitions() {
             "Gesture",
             "",
             "Get the detected gesture",
+        ),
+        (
+            "get_touch_position",
+            "Vector2",
+            "(index: integer)",
+            "Get the position of a touch",
         ),
     ];
 

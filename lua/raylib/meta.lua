@@ -104,6 +104,13 @@ function Window:draw_text(text, x, y, size, color) end
 ---@return nil
 function Window:draw_rectangle(x, y, width, height, color) end
 
+---Draw a color-filled rectangle
+---@param self Window
+---@param rect Rectangle
+---@param color Color
+---@return nil
+function Window:draw_rectangle_rec(rect, color) end
+
 ---Draw a color-filled circle
 ---@param self Window
 ---@param x integer
@@ -266,6 +273,12 @@ function Window:close() end
 ---@param self Window
 ---@return Gesture
 function Window:get_gesture_detected() end
+
+---Get the position of a touch
+---@param self Window
+---@param index integer
+---@return Vector2
+function Window:get_touch_position(index) end
 
 ---Initialize window and OpenGL context
 ---@param width integer Window width

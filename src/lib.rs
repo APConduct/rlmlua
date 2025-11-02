@@ -350,6 +350,10 @@ impl<'l> LuaUserData for LuaRaylib<'l> {
             // )))
             Ok(LuaGesture::from(this.rl.get_gesture_detected()))
         });
+
+        methods.add_method_mut("get_touch_position", |_, this, index: u32| {
+            Ok(LuaVector2::from(this.rl.get_touch_position(index)))
+        });
     }
 }
 
@@ -402,6 +406,22 @@ impl<'a> LuaUserData for LuaDrawHandle<'a> {
                                 y,
                                 width,
                                 height,
+                                <LuaColor as Into<Color>>::into(color),
+                            );
+                        }
+                    }
+                });
+                Ok(())
+            },
+        );
+        methods.add_function(
+            "draw_rectangle_rec",
+            |_, (rect, color): (LuaRectangle, LuaColor)| {
+                DRAW_HANDLE.with(|cell| {
+                    if let Some(d) = *cell.borrow() {
+                        unsafe {
+                            (*d).draw_rectangle_rec(
+                                <LuaRectangle as Into<Rectangle>>::into(rect),
                                 <LuaColor as Into<Color>>::into(color),
                             );
                         }
@@ -719,6 +739,13 @@ fn color(_lua: &Lua, (r, g, b, a): (u8, u8, u8, Option<u8>)) -> LuaResult<LuaCol
         b,
         a: a.unwrap_or(255),
     })
+}
+
+fn check_collision_point_rec(
+    _lua: &Lua,
+    (point, rec): (LuaVector2, LuaRectangle),
+) -> LuaResult<bool> {
+    Ok(unsafe { raylib::ffi::CheckCollisionPointRec(point.into(), rec.into()) })
 }
 
 impl IntoLua for LuaColor {
@@ -1090,6 +1117,15 @@ impl From<LuaVector2> for Vector2 {
     }
 }
 
+impl From<LuaVector2> for raylib::ffi::Vector2 {
+    fn from(value: LuaVector2) -> Self {
+        raylib::ffi::Vector2 {
+            x: value.x,
+            y: value.y,
+        }
+    }
+}
+
 impl From<Vector2> for LuaVector2 {
     fn from(value: Vector2) -> Self {
         LuaVector2 {
@@ -1235,12 +1271,89 @@ impl FromLua for LuaVector3 {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct LuaRectangle {
+    pub x: f32,
+    pub y: f32,
+    pub width: f32,
+    pub height: f32,
+}
+
+impl From<LuaRectangle> for Rectangle {
+    fn from(rect: LuaRectangle) -> Self {
+        Rectangle {
+            x: rect.x,
+            y: rect.y,
+            width: rect.width,
+            height: rect.height,
+        }
+    }
+}
+
+impl From<LuaRectangle> for raylib::ffi::Rectangle {
+    fn from(rect: LuaRectangle) -> Self {
+        raylib::ffi::Rectangle {
+            x: rect.x,
+            y: rect.y,
+            width: rect.width,
+            height: rect.height,
+        }
+    }
+}
+
+impl<'lua> FromLua for LuaRectangle {
+    fn from_lua(value: LuaValue, _lua: &Lua) -> LuaResult<Self> {
+        match value {
+            LuaValue::Table(table) => {
+                let x: f32 = table.get("x")?;
+                let y: f32 = table.get("y")?;
+                let width: f32 = table.get("width")?;
+                let height: f32 = table.get("height")?;
+                Ok(LuaRectangle {
+                    x,
+                    y,
+                    width,
+                    height,
+                })
+            }
+            _ => Err(LuaError::FromLuaConversionError {
+                from: value.type_name(),
+                to: "LuaRectangle".to_string(),
+                message: None,
+            }),
+        }
+    }
+}
+
+impl LuaRectangle {
+    pub fn new(x: f32, y: f32, width: f32, height: f32) -> Self {
+        LuaRectangle {
+            x,
+            y,
+            width,
+            height,
+        }
+    }
+}
+
+impl LuaUserData for LuaRectangle {
+    fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {}
+    fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {}
+}
+
 pub fn vector2<'lua>(_lua: &Lua, (x, y): (f32, f32)) -> LuaResult<LuaVector2> {
     Ok(LuaVector2 { x, y })
 }
 
 pub fn vector3<'lua>(_lua: &Lua, (x, y, z): (f32, f32, f32)) -> LuaResult<LuaVector3> {
     Ok(LuaVector3 { x, y, z })
+}
+
+pub fn rect<'lua>(
+    _lua: &Lua,
+    (x, y, width, height): (f32, f32, f32, f32),
+) -> LuaResult<LuaRectangle> {
+    Ok(LuaRectangle::new(x, y, width, height))
 }
 
 pub fn gesture<'lua>(_lua: &Lua, _gesture: String) -> LuaResult<LuaGesture> {
@@ -1344,6 +1457,10 @@ fn raylib_lua(lua: &Lua) -> LuaResult<LuaTable> {
     // Core functions
     exports.set("init_window", lua.create_function(init_window)?)?;
     exports.set("color", lua.create_function(color)?)?;
+    exports.set(
+        "check_collision_point_rec",
+        lua.create_function(check_collision_point_rec)?,
+    )?;
 
     // Register color constants
     register_colors(lua, &exports)?;
@@ -1372,6 +1489,8 @@ fn rlm_lua(lua: &Lua) -> LuaResult<LuaTable> {
 
     // Vector2 functions
     exports.set("vec2", lua.create_function(vector2)?)?;
+    exports.set("vec3", lua.create_function(vector3)?)?;
+    exports.set("rect", lua.create_function(rect)?)?;
 
     // Version info
     exports.set("_VERSION", "0.1.0")?;
