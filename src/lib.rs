@@ -781,9 +781,9 @@ fn color(_lua: &Lua, (r, g, b, a): (u8, u8, u8, Option<u8>)) -> LuaResult<LuaCol
     })
 }
 
-fn fade(_lua: &Lua, (color, alpha): (LuaColor, u8)) -> LuaResult<LuaColor> {
+fn fade(_lua: &Lua, (color, alpha): (LuaColor, f32)) -> LuaResult<LuaColor> {
     // use raylib::ffi::Fade;
-    let faded_color = unsafe { raylib::ffi::Fade(color.into(), alpha as f32) };
+    let faded_color = unsafe { raylib::ffi::Fade(color.into(), alpha) };
     Ok(faded_color.into())
 }
 
