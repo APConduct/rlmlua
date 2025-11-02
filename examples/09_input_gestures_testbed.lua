@@ -5,9 +5,9 @@ local rlc = rl.colors
 local GESTURE_LOG_SIZE = 20
 local MAX_TOUCH_COUNT = 32
 
----@type fun(gesture: integer): string
+---@type fun(gesture: Gesture): string
 local get_gesture_name
----@type fun(gesture: integer): Color
+---@type fun(gesture: Gesture): Color
 local get_gesture_color
 
 local screen_width = 800
@@ -17,14 +17,13 @@ local window = rl.init_window(screen_width, screen_height, "rlmlua example - inp
 
 local message_position = rlm.vec2(160, 7)
 
-local last_gesture = 0
+local last_gesture = rl.GESTURE_NONE
 local last_gesture_position = rlm.vec2(165, 130)
 
 local gesture_log = { --[[""]] }
 
----@type integer
 local gesture_log_index = GESTURE_LOG_SIZE
-local previous_gesture = 0
+local previous_gesture = rl.GESTURE_NONE
 
 
 -- Log mode values:
@@ -51,7 +50,7 @@ while not window:should_close() do
     local i
     local ii
     local current_gesture = window:get_gesture_detected()
-    local current_drag_degrees = window:get_gesture_pitch_angle()
+    local current_drag_degrees = window:get_gesture_drag_angle()
     local current_pinch_degrees = window:get_gesture_pinch_angle()
     local touch_count = window:get_touch_point_count()
 
@@ -267,6 +266,7 @@ while not window:should_close() do
     -- Draw touch and mouse pointer points
     if current_gesture ~= rl.GESTURE_NONE then
         if touch_count ~= 0 then
+            ---@diagnostic disable-next-line: redefined-local
             for i = 1, touch_count do
                 window:draw_circle_v(touch_position[i], 50.0, rl.fade(gesture_color, 0.5))
                 window:draw_circle_v(touch_position[i], 5.0, gesture_color)

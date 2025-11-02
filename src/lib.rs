@@ -202,6 +202,38 @@ impl<'l> LuaUserData for LuaRaylib<'l> {
         );
 
         methods.add_method_mut(
+            "draw_ring",
+            |_,
+             _this,
+             (center, inner_radius, outer_radius, start_angle, end_angle, segments, color): (
+                LuaVector2,
+                f32,
+                f32,
+                f32,
+                f32,
+                i32,
+                LuaColor,
+            )| {
+                DRAW_HANDLE.with(|cell| {
+                    if let Some(d) = *cell.borrow() {
+                        unsafe {
+                            (*d).draw_ring(
+                                center,
+                                inner_radius,
+                                outer_radius,
+                                start_angle,
+                                end_angle,
+                                segments,
+                                <LuaColor as Into<Color>>::into(color),
+                            );
+                        }
+                    }
+                });
+                Ok(())
+            },
+        );
+
+        methods.add_method_mut(
             "draw_rectangle_lines",
             |_, _this, (x, y, width, height, color): (i32, i32, i32, i32, LuaColor)| {
                 DRAW_HANDLE.with(|cell| {
@@ -369,6 +401,18 @@ impl<'l> LuaUserData for LuaRaylib<'l> {
             Ok(LuaGesture::from(this.rl.get_gesture_detected()))
         });
 
+        methods.add_method_mut("get_gesture_pitch_angle", |_, this, ()| {
+            Ok(this.rl.get_gesture_pinch_angle())
+        });
+
+        methods.add_method_mut("get_gesture_drag_angle", |_, this, ()| {
+            Ok(this.rl.get_gesture_drag_angle())
+        });
+
+        methods.add_method_mut("get_touch_point_count", |_, this, ()| {
+            Ok(this.rl.get_touch_point_count())
+        });
+
         methods.add_method_mut("get_touch_position", |_, this, index: u32| {
             Ok(LuaVector2::from(this.rl.get_touch_position(index)))
         });
@@ -484,6 +528,7 @@ impl<'a> LuaUserData for LuaDrawHandle<'a> {
             });
             Ok(())
         });
+
         methods.add_function(
             "draw_rectangle_lines",
             |_, (x, y, width, height, color): (i32, i32, i32, i32, LuaColor)| {

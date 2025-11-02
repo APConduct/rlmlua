@@ -199,6 +199,12 @@ fn generate_raylib_definitions() {
             "Draw pixel",
         ),
         (
+            "draw_ring",
+            "nil",
+            "(center: Vector2, inner_radius: number, outer_radius: number, start_angle: number, end_angle: number, segments: integer, color: Color)",
+            "Draw ring",
+        ),
+        (
             "draw_rectangle_lines",
             "nil",
             "(x: integer, y: integer, width: integer, height: integer, color: Color)",
@@ -322,6 +328,24 @@ fn generate_raylib_definitions() {
             "Gesture",
             "",
             "Get the detected gesture",
+        ),
+        (
+            "get_gesture_drag_angle",
+            "number",
+            "",
+            "Get the angle of the drag gesture",
+        ),
+        (
+            "get_gesture_pinch_angle",
+            "number",
+            "",
+            "Get the angle of the pinch gesture",
+        ),
+        (
+            "get_touch_point_count",
+            "number",
+            "",
+            "Get the number of touch points",
         ),
         (
             "get_touch_position",

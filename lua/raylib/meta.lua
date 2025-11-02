@@ -138,6 +138,18 @@ function Window:draw_line(x1, y1, x2, y2, color) end
 ---@return nil
 function Window:draw_pixel(x, y, color) end
 
+---Draw ring
+---@param self Window
+---@param center Vector2
+---@param inner_radius number
+---@param outer_radius number
+---@param start_angle number
+---@param end_angle number
+---@param segments integer
+---@param color Color
+---@return nil
+function Window:draw_ring(center, inner_radius, outer_radius, start_angle, end_angle, segments, color) end
+
 ---Draw rectangle outline
 ---@param self Window
 ---@param x integer
@@ -273,6 +285,21 @@ function Window:close() end
 ---@param self Window
 ---@return Gesture
 function Window:get_gesture_detected() end
+
+---Get the angle of the drag gesture
+---@param self Window
+---@return number
+function Window:get_gesture_drag_angle() end
+
+---Get the angle of the pinch gesture
+---@param self Window
+---@return number
+function Window:get_gesture_pinch_angle() end
+
+---Get the number of touch points
+---@param self Window
+---@return number
+function Window:get_touch_point_count() end
 
 ---Get the position of a touch
 ---@param self Window
