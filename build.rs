@@ -96,6 +96,20 @@ fn generate_raylib_definitions() {
     output.push_str("---@field width number Rectangle width\n");
     output.push_str("---@field height number Rectangle height\n\n");
 
+    // Gesture type
+    output.push_str("---@class Gesture\n");
+    output.push_str("---@field None Gesture\n");
+    output.push_str("---@field Drag Gesture\n");
+    output.push_str("---@field SwipeRight Gesture\n");
+    output.push_str("---@field SwipeLeft Gesture\n");
+    output.push_str("---@field SwipeUp Gesture\n");
+    output.push_str("---@field SwipeDown Gesture\n");
+    output.push_str("---@field PinchIn Gesture\n");
+    output.push_str("---@field PinchOut Gesture\n");
+    output.push_str("---@field DoubleTap Gesture\n");
+    output.push_str("---@field Tap Gesture\n");
+    output.push_str("---@field Hold Gesture\n");
+
     // Window class
     output.push_str("---Raylib window handle\n");
     output.push_str("---@class Window\n");
@@ -297,6 +311,12 @@ fn generate_raylib_definitions() {
             "Get the scroll wheel position",
         ),
         ("close", "nil", "", "Close the window"),
+        (
+            "get_gesture_detected",
+            "Gesture",
+            "",
+            "Get the detected gesture",
+        ),
     ];
 
     let other_functions: Vec<(&str, &str, &str, &'static str)> = vec![];

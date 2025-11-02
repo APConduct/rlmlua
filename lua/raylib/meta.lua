@@ -25,6 +25,18 @@ local raylib = {}
 ---@field width number Rectangle width
 ---@field height number Rectangle height
 
+---@class Gesture
+---@field None Gesture
+---@field Drag Gesture
+---@field SwipeRight Gesture
+---@field SwipeLeft Gesture
+---@field SwipeUp Gesture
+---@field SwipeDown Gesture
+---@field PinchIn Gesture
+---@field PinchOut Gesture
+---@field DoubleTap Gesture
+---@field Tap Gesture
+---@field Hold Gesture
 ---Raylib window handle
 ---@class Window
 local Window = {}
@@ -248,6 +260,11 @@ function Window:get_mouse_wheel_move() end
 ---@param self Window
 ---@return nil
 function Window:close() end
+
+---Get the detected gesture
+---@param self Window
+---@return Gesture
+function Window:get_gesture_detected() end
 
 ---Initialize window and OpenGL context
 ---@param width integer Window width

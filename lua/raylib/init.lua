@@ -12,6 +12,29 @@ rl.colors = raylib_core.colors
 rl.Vector2 = raylib_core.Vector2
 rl.Vector3 = raylib_core.Vector3
 
+---@type Gesture
+rl.GESTURE_NONE = raylib_core.GESTURE_NONE
+---@type Gesture
+rl.GESTURE_DRAG = raylib_core.GESTURE_DRAG
+---@type Gesture
+rl.GESTURE_PINCH_IN = raylib_core.GESTURE_PINCH_IN
+---@type Gesture
+rl.GESTURE_PINCH_OUT = raylib_core.GESTURE_PINCH_OUT
+---@type Gesture
+rl.GESTURE_SWIPE_RIGHT = raylib_core.GESTURE_SWIPE_RIGHT
+---@type Gesture
+rl.GESTURE_SWIPE_LEFT = raylib_core.GESTURE_SWIPE_LEFT
+---@type Gesture
+rl.GESTURE_SWIPE_UP = raylib_core.GESTURE_SWIPE_UP
+---@type Gesture
+rl.GESTURE_SWIPE_DOWN = raylib_core.GESTURE_SWIPE_DOWN
+---@type Gesture
+rl.GESTURE_HOLD = raylib_core.GESTURE_HOLD
+---@type Gesture
+rl.GESTURE_TAP = raylib_core.GESTURE_TAP
+---@type Gesture
+rl.GESTURE_DOUBLETAP = raylib_core.GESTURE_DOUBLETAP
+
 -- Helper: Safe drawing wrapper with automatic begin/end
 -- This prevents forgetting to call end_drawing and handles errors gracefully
 ---@param window Window

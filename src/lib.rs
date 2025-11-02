@@ -1351,6 +1351,17 @@ fn raylib_lua(lua: &Lua) -> LuaResult<LuaTable> {
     // Version info
     exports.set("_VERSION", "0.1.0")?;
     exports.set("_DESCRIPTION", "Raylib bindings for Lua")?;
+    exports.set("GESTURE_NONE", LuaGesture::None)?;
+    exports.set("GESTURE_DRAG", LuaGesture::Drag)?;
+    exports.set("GESTURE_SWIPE_RIGHT", LuaGesture::SwipeRight)?;
+    exports.set("GESTURE_SWIPE_LEFT", LuaGesture::SwipeLeft)?;
+    exports.set("GESTURE_SWIPE_UP", LuaGesture::SwipeUp)?;
+    exports.set("GESTURE_SWIPE_DOWN", LuaGesture::SwipeDown)?;
+    exports.set("GESTURE_PINCH_IN", LuaGesture::PinchIn)?;
+    exports.set("GESTURE_PINCH_OUT", LuaGesture::PinchOut)?;
+    exports.set("GESTURE_HOLD", LuaGesture::Hold)?;
+    exports.set("GESTURE_TAP", LuaGesture::Tap)?;
+    exports.set("GESTURE_DOUBLETAP", LuaGesture::DoubleTap)?;
 
     Ok(exports)
 }
