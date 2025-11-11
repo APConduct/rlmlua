@@ -5,7 +5,10 @@ local rlc = rl.colors
 local screen_width = 800
 local screen_height = 450
 
-local window = rl.init_window(screen_width, screen_height, "rlmlua example - input mouse wheel")
+local window = rl.init_window(
+    screen_width, screen_height,
+    "rlmlua example - input mouse wheel"
+)
 
 local box_position_y = screen_height / 2 - 40
 local scroll_speed = 4

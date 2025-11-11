@@ -38,6 +38,14 @@ local raylib = {}
 ---@field Tap Gesture
 ---@field Hold Gesture
 
+---@class Camera2D
+---@field offset Vector2 Camera offset (used for 2d drawing, added to target)
+---@field rotation number Camera rotation in degrees
+---@field target Vector2 Camera target (used for 2d drawing, added to offset)
+---@field zoom number Camera zoom (scaling), default 1.0
+
+---@class Font
+
 ---Raylib window handle
 ---@class Window
 local Window = {}
@@ -325,6 +333,80 @@ function Window:get_touch_point_count() end
 ---@return Vector2
 function Window:get_touch_position(index) end
 
+---Get the mouse delta
+---@param self Window
+---@return Vector2
+function Window:get_mouse_delta() end
+
+---Convert screen coordinates to world coordinates
+---@param self Window
+---@param pos Vector2
+---@param camera Camera2D
+---@return Vector2
+function Window:get_screen_to_world_2d(pos, camera) end
+
+---Begin 2D mode
+---@param self Window
+---@param camera Camera2D
+---@return nil
+function Window:begin_mode_2d(camera) end
+
+---End 2D mode
+---@param self Window
+---@return nil
+function Window:end_mode_2d() end
+
+---Push a matrix to the stack
+---@param self Window
+---@return nil
+function Window:rl_push_matrix() end
+
+---Pop a matrix from the stack
+---@param self Window
+---@return nil
+function Window:rl_pop_matrix() end
+
+---Translate the matrix
+---@param self Window
+---@param x number
+---@param y number
+---@param z number
+---@param gamma number
+---@return nil
+function Window:rl_translate(x, y, z, gamma) end
+
+---Rotate the matrix
+---@param self Window
+---@param angle number
+---@param x number
+---@param y number
+---@param z number
+---@return nil
+function Window:rl_rotate(angle, x, y, z) end
+
+---Draw a grid
+---@param self Window
+---@param width number
+---@param height number
+---@return nil
+function Window:rl_draw_grid(width, height) end
+
+---Draw text using a custom font
+---@param self Window
+---@param font Font
+---@param text string
+---@param position Vector2
+---@param font_size number
+---@param spacing number
+---@param tint Color
+---@return nil
+function Window:draw_text_ex(font, text, position, font_size,  spacing, tint) end
+
+---
+---@param self Window
+---@return Font
+function Window:get_font_default() end
+
 ---Initialize window and OpenGL context
 ---@param width integer Window width
 ---@param height integer Window height
@@ -344,6 +426,10 @@ function raylib.color(r, g, b, a) end
 ---@param window Window The window to draw on
 ---@param callback fun(window: Window) Drawing callback function
 function raylib.draw(window, callback) end
+
+---Get a random value
+---@return number
+function raylib.get_random_value(min, max) end
 
 ---Predefined color constants
 ---@class Colors

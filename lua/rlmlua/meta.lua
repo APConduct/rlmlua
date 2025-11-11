@@ -76,6 +76,13 @@ function rlmlua.vec2_lerp(a, b, t) end
 ---@return Rectangle
 function rlmlua.rect(x, y, width, height) end
 
+---Create a 2D camera---@param offset Vector2|nil Camera offset
+---@param target Vector2|nil Camera target
+---@param rotation number|nil Camera rotation
+---@param zoom number|nil Camera zoom
+---@return Camera2D
+function rlmlua.camera2d(offset, target, rotation, zoom) end
+
 ---Check if point is inside rectangle
 ---@param rect Rectangle
 ---@param x number Point X coordinate

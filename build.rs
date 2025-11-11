@@ -110,6 +110,18 @@ fn generate_raylib_definitions() {
     output.push_str("---@field Tap Gesture\n");
     output.push_str("---@field Hold Gesture\n\n");
 
+    output.push_str("---@class Camera2D\n");
+    output.push_str(
+        "---@field offset Vector2 Camera offset (used for 2d drawing, added to target)\n",
+    );
+    output.push_str("---@field rotation number Camera rotation in degrees\n");
+    output.push_str(
+        "---@field target Vector2 Camera target (used for 2d drawing, added to offset)\n",
+    );
+    output.push_str("---@field zoom number Camera zoom (scaling), default 1.0\n\n");
+
+    output.push_str("---@class Font\n\n");
+
     // Window class
     output.push_str("---Raylib window handle\n");
     output.push_str("---@class Window\n");
@@ -365,6 +377,47 @@ fn generate_raylib_definitions() {
             "(index: integer)",
             "Get the position of a touch",
         ),
+        ("get_mouse_delta", "Vector2", "", "Get the mouse delta"),
+        (
+            "get_screen_to_world_2d",
+            "Vector2",
+            "(pos: Vector2, camera: Camera2D)",
+            "Convert screen coordinates to world coordinates",
+        ),
+        (
+            "begin_mode_2d",
+            "nil",
+            "(camera: Camera2D)",
+            "Begin 2D mode",
+        ),
+        ("end_mode_2d", "nil", "", "End 2D mode"),
+        ("rl_push_matrix", "nil", "", "Push a matrix to the stack"),
+        ("rl_pop_matrix", "nil", "", "Pop a matrix from the stack"),
+        (
+            "rl_translate",
+            "nil",
+            "(x: number, y: number, z: number, gamma: number)",
+            "Translate the matrix",
+        ),
+        (
+            "rl_rotate",
+            "nil",
+            "(angle: number, x: number, y: number, z: number)",
+            "Rotate the matrix",
+        ),
+        (
+            "rl_draw_grid",
+            "nil",
+            "(width: number, height: number)",
+            "Draw a grid",
+        ),
+        (
+            "draw_text_ex",
+            "nil",
+            "(font: Font, text: string, position: Vector2, font_size: number,  spacing: number, tint: Color)",
+            "Draw text using a custom font",
+        ),
+        ("get_font_default", "Font", "", ""),
     ];
 
     let _other_functions: Vec<(&str, &str, &str, &'static str)> = vec![];
@@ -421,6 +474,10 @@ fn generate_raylib_definitions() {
     output.push_str("---@param window Window The window to draw on\n");
     output.push_str("---@param callback fun(window: Window) Drawing callback function\n");
     output.push_str("function raylib.draw(window, callback) end\n\n");
+
+    output.push_str("---Get a random value\n");
+    output.push_str("---@return number\n");
+    output.push_str("function raylib.get_random_value(min, max) end\n\n");
 
     // Color constants
     output.push_str("---Predefined color constants\n");
@@ -549,6 +606,14 @@ fn generate_rlmlua_definitions() {
     output.push_str("---@param height number Rectangle height\n");
     output.push_str("---@return Rectangle\n");
     output.push_str("function rlmlua.rect(x, y, width, height) end\n\n");
+
+    output.push_str("---Create a 2D camera");
+    output.push_str("---@param offset Vector2|nil Camera offset\n");
+    output.push_str("---@param target Vector2|nil Camera target\n");
+    output.push_str("---@param rotation number|nil Camera rotation\n");
+    output.push_str("---@param zoom number|nil Camera zoom\n");
+    output.push_str("---@return Camera2D\n");
+    output.push_str("function rlmlua.camera2d(offset, target, rotation, zoom) end\n\n");
 
     output.push_str("---Check if point is inside rectangle\n");
     output.push_str("---@param rect Rectangle\n");
