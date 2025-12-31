@@ -271,6 +271,16 @@ function Window:is_mouse_button_up(button) end
 ---@return boolean
 function Window:is_cursor_hidden() end
 
+---Show cursor
+---@param self Window
+---@return nil
+function Window:show_cursor() end
+
+---Hide cursor
+---@param self Window
+---@return nil
+function Window:hide_cursor() end
+
 ---Get the width of the screen
 ---@param self Window
 ---@return number

@@ -14,6 +14,14 @@ local ball_color = rlc.DARKBLUE
 window:set_target_fps(60)
 
 while not window:should_close() do
+    if window:is_key_pressed("H") then
+        if window:is_cursor_hidden() then
+            window:show_cursor()
+        else
+            window:hide_cursor()
+        end
+    end
+
     if window:is_mouse_button_pressed("LEFT") then
         ball_color = rlc.MAROON
     elseif window:is_mouse_button_pressed("MIDDLE") then

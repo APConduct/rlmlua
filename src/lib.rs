@@ -450,6 +450,9 @@ impl<'l> LuaUserData for LuaRaylib<'l> {
         methods.add_method_mut("get_touch_position", |_, this, index: u32| {
             Ok(LuaVector2::from(this.rl.get_touch_position(index)))
         });
+
+        methods.add_method_mut("show_cursor", |_, this, ()| Ok(this.rl.show_cursor()));
+        methods.add_method_mut("hide_cursor", |_, this, ()| Ok(this.rl.hide_cursor()));
     }
 }
 

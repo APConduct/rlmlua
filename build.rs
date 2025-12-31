@@ -310,6 +310,8 @@ fn generate_raylib_definitions() {
             "()",
             "Check if the cursor is hidden",
         ),
+        ("show_cursor", "nil", "()", "Show cursor"),
+        ("hide_cursor", "nil", "()", "Hide cursor"),
         (
             "get_screen_width",
             "number",
