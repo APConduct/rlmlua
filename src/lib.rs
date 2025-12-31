@@ -1628,8 +1628,20 @@ impl LuaUserData for LuaGesture {
             })
         });
 
-        methods.add_meta_method(mlua::MetaMethod::Eq, |_, this, other: LuaGesture| {
-            Ok(*this == other)
+        methods.add_meta_method(mlua::MetaMethod::Eq, |_, this, other: mlua::Value| {
+            let this_val = gesture_to_int(*this);
+            match other {
+                mlua::Value::Integer(i) => Ok(this_val == i as i32),
+                mlua::Value::Number(n) => Ok((this_val as f64) == n),
+                mlua::Value::UserData(ud) => {
+                    if let Ok(other_gesture) = ud.borrow::<LuaGesture>() {
+                        Ok(*this == *other_gesture)
+                    } else {
+                        Ok(false)
+                    }
+                }
+                _ => Ok(false),
+            }
         });
 
         // Add comparison operators for integers

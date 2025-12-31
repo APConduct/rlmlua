@@ -15,21 +15,21 @@ local function get_gesture_name(gesture)
         return "Tap"
     elseif gesture == 2 then
         return "Double Tap"
-    elseif gesture == 3 then
-        return "Hold"
     elseif gesture == 4 then
-        return "Drag"
-    elseif gesture == 5 then
-        return "Swipe Right"
-    elseif gesture == 6 then
-        return "Swipe Left"
-    elseif gesture == 7 then
-        return "Swipe Up"
+        return "Hold"
     elseif gesture == 8 then
+        return "Drag"
+    elseif gesture == 16 then
+        return "Swipe Right"
+    elseif gesture == 32 then
+        return "Swipe Left"
+    elseif gesture == 64 then
+        return "Swipe Up"
+    elseif gesture == 128 then
         return "Swipe Down"
-    elseif gesture == 9 then
+    elseif gesture == 256 then
         return "Pinch In"
-    elseif gesture == 10 then
+    elseif gesture == 512 then
         return "Pinch Out"
     else
         return "Unknown"
@@ -107,9 +107,15 @@ while not window:should_close() do
     local i
     local ii
     local current_gesture = window:get_gesture_detected()
+    local current_gesture_int = current_gesture:to_int()
     local current_drag_degrees = window:get_gesture_drag_angle()
     local current_pinch_degrees = window:get_gesture_pinch_angle()
     local touch_count = window:get_touch_point_count()
+
+    -- Handle last gesture
+    if (current_gesture_int ~= 0) and (current_gesture_int ~= 4) and (current_gesture_int ~= previous_gesture) then
+        last_gesture = current_gesture -- Filter the meaningful gestures (1, 2, 8 to 512) for the display
+    end
 
     if window:is_mouse_button_released("LEFT") then
         if rl.check_collision_point_rec(window:get_mouse_position(), log_button1) then
@@ -136,17 +142,17 @@ while not window:should_close() do
     end
 
     local fill_log = 0
-    if current_gesture ~= 0 then
+    if current_gesture_int ~= 0 then
         if log_mode == 3 then
-            if (current_gesture ~= 4) and (current_gesture ~= previous_gesture) or (current_gesture < 3) then
+            if (current_gesture_int ~= 4) and (current_gesture_int ~= previous_gesture) or (current_gesture_int < 3) then
                 fill_log = 1
             end
         elseif log_mode == 2 then
-            if current_gesture ~= 4 then
+            if current_gesture_int ~= 4 then
                 fill_log = 1
             end
         elseif log_mode == 1 then
-            if current_gesture ~= previous_gesture then
+            if current_gesture_int ~= previous_gesture then
                 fill_log = 1
             end
         else
@@ -154,22 +160,23 @@ while not window:should_close() do
         end
     end
 
-    if fill_log then
-        previous_gesture = current_gesture
-        gesture_color = get_gesture_color(current_gesture)
+    if fill_log == 1 then
+        previous_gesture = current_gesture_int
+
+        gesture_color = get_gesture_color(current_gesture_int)
         if gesture_log_index <= 0 then
             gesture_log_index = GESTURE_LOG_SIZE
         end
         gesture_log_index = gesture_log_index - 1
 
-        gesture_log[gesture_log_index] = get_gesture_name(current_gesture)
+        gesture_log[gesture_log_index] = get_gesture_name(current_gesture_int)
     end
 
-    if current_gesture < 225 then
+    if current_gesture_int > 255 then
         current_angle_degrees = current_pinch_degrees
-    elseif current_gesture > 15 then
+    elseif current_gesture_int > 15 then
         current_angle_degrees = current_drag_degrees
-    elseif current_gesture > 0 then
+    elseif current_gesture_int > 0 then
         current_angle_degrees = 0.0
     end
 
@@ -247,6 +254,12 @@ while not window:should_close() do
         rlm.vec2(last_gesture_position.x + 159, last_gesture_position.y + 53),
         rlm.vec2(last_gesture_position.x + 159, last_gesture_position.y + 33),
         ternary(last_gesture == rl.GESTURE_PINCH_IN, rlc.VIOLET, rlc.LIGHTGRAY))
+
+    -- Draw touch count indicators
+    for i = 0, 3 do
+        window:draw_circle(last_gesture_position.x + 180, last_gesture_position.y + 7 + i * 15, 5,
+            touch_count <= i and rlc.LIGHTGRAY or gesture_color)
+    end
 
     window:draw_text("Log", gesture_log_position.x, gesture_log_position.y, 20, rlc.BLACK)
 
@@ -328,7 +341,7 @@ while not window:should_close() do
 
             if touch_count == 2 then
                 window:draw_line_ex(touch_position[1], touch_position[2],
-                    current_gesture == 512 and 8.0 or 12.0, gesture_color)
+                    current_gesture_int == 512 and 8.0 or 12.0, gesture_color)
             end
         else
             window:draw_circle_v(mouse_position, 35.0, rl.fade(gesture_color, 0.5))
