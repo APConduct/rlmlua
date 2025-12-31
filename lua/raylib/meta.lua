@@ -37,6 +37,7 @@ local raylib = {}
 ---@field DoubleTap Gesture
 ---@field Tap Gesture
 ---@field Hold Gesture
+---@field to_int function
 
 ---@class Camera2D
 ---@field offset Vector2 Camera offset (used for 2d drawing, added to target)

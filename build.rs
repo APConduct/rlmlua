@@ -108,7 +108,13 @@ fn generate_raylib_definitions() {
     output.push_str("---@field PinchOut Gesture\n");
     output.push_str("---@field DoubleTap Gesture\n");
     output.push_str("---@field Tap Gesture\n");
-    output.push_str("---@field Hold Gesture\n\n");
+    output.push_str("---@field Hold Gesture\n");
+    output.push_str("---@field to_int function\n\n");
+
+    // output.push_str("---Convert a Gesture to an integer\n");
+    // output.push_str("---@param gesture Gesture\n");
+    // output.push_str("---@return integer\n");
+    // output.push_str("function to_int(gesture) end\n\n");
 
     output.push_str("---@class Camera2D\n");
     output.push_str(
