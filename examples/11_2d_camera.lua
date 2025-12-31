@@ -16,12 +16,13 @@ local build_colors = {}
 local spacing = 0
 
 for i = 1, MAX_BUILDINGS do
-    buildings[i].width = rl.get_random_value(50, 200)
-    buildings[i].height = rl.get_random_value(100, 800)
-    buildings[i].y = screen_height - 130.0 - buildings[i].height
-    buildings[i].x = -6000.0 + spacing
+    local width = rl.get_random_value(50, 200)
+    local height = rl.get_random_value(100, 800)
+    local y = screen_height - 130.0 - height
+    local x = -6000.0 + spacing
 
-    spacing = spacing + buildings[i].width
+    buildings[i] = rlm.rect(x, y, width, height)
+    spacing = spacing + width
 
     build_colors[i] = rl.color(
         rl.get_random_value(200, 240),
@@ -42,7 +43,7 @@ window:set_target_fps(60)
 while not window:should_close() do
     if window:is_key_down("RIGHT") then
         player.x = player.x + 2
-    elseif window:is_key_down("A") then
+    elseif window:is_key_down("LEFT") then
         player.x = player.x - 2
     end
 

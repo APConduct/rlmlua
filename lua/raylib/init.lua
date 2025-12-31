@@ -17,6 +17,9 @@ rl.check_collision_point_rec = raylib_core.check_collision_point_rec
 
 rl.fade = raylib_core.fade
 
+---@type fun(min: integer, max: integer): integer
+rl.get_random_value = raylib_core.get_random_value
+
 ---@type Gesture|integer
 rl.GESTURE_NONE = raylib_core.GESTURE_NONE
 ---@type Gesture|integer

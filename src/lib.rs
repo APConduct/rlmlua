@@ -95,6 +95,29 @@ impl<'l> LuaUserData for LuaRaylib<'l> {
             Ok(())
         });
 
+        methods.add_method_mut("begin_mode_2d", |_, _this, camera: LuaCamera2D| {
+            DRAW_HANDLE.with(|cell| {
+                if let Some(_d) = *cell.borrow() {
+                    unsafe {
+                        let camera_ffi: raylib::ffi::Camera2D = camera.into();
+                        raylib::ffi::BeginMode2D(camera_ffi);
+                    }
+                }
+            });
+            Ok(())
+        });
+
+        methods.add_method_mut("end_mode_2d", |_, _this, ()| {
+            DRAW_HANDLE.with(|cell| {
+                if let Some(_d) = *cell.borrow() {
+                    unsafe {
+                        raylib::ffi::EndMode2D();
+                    }
+                }
+            });
+            Ok(())
+        });
+
         methods.add_method_mut("clear_background", |_, _this, color: LuaColor| {
             DRAW_HANDLE.with(|cell| {
                 if let Some(d) = *cell.borrow() {
@@ -869,6 +892,11 @@ fn fade(_lua: &Lua, (color, alpha): (LuaColor, f32)) -> LuaResult<LuaColor> {
     Ok(faded_color.into())
 }
 
+fn get_random_value(_lua: &Lua, (min, max): (i32, i32)) -> LuaResult<i32> {
+    let value = unsafe { raylib::ffi::GetRandomValue(min, max) };
+    Ok(value)
+}
+
 fn check_collision_point_rec(
     _lua: &Lua,
     (point, rec): (LuaVector2, LuaRectangle),
@@ -1157,7 +1185,7 @@ fn register_colors(lua: &Lua, exports: &LuaTable) -> LuaResult<()> {
     Ok(())
 }
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct LuaVector2 {
     pub x: f32,
     pub y: f32,
@@ -1486,12 +1514,122 @@ impl LuaRectangle {
 impl LuaUserData for LuaRectangle {
     fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {
         fields.add_field_method_get("x", |_, this| Ok(this.x));
+        fields.add_field_method_set("x", |_, this, val: f32| {
+            this.x = val;
+            Ok(())
+        });
         fields.add_field_method_get("y", |_, this| Ok(this.y));
+        fields.add_field_method_set("y", |_, this, val: f32| {
+            this.y = val;
+            Ok(())
+        });
         fields.add_field_method_get("width", |_, this| Ok(this.width));
+        fields.add_field_method_set("width", |_, this, val: f32| {
+            this.width = val;
+            Ok(())
+        });
         fields.add_field_method_get("height", |_, this| Ok(this.height));
+        fields.add_field_method_set("height", |_, this, val: f32| {
+            this.height = val;
+            Ok(())
+        });
     }
     fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("__eq", |_, this, other: LuaRectangle| Ok(*this == other));
+    }
+}
+
+// Camera2D
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct LuaCamera2D {
+    pub offset: LuaVector2,
+    pub target: LuaVector2,
+    pub rotation: f32,
+    pub zoom: f32,
+}
+
+impl From<LuaCamera2D> for raylib::ffi::Camera2D {
+    fn from(camera: LuaCamera2D) -> Self {
+        raylib::ffi::Camera2D {
+            offset: raylib::ffi::Vector2 {
+                x: camera.offset.x,
+                y: camera.offset.y,
+            },
+            target: raylib::ffi::Vector2 {
+                x: camera.target.x,
+                y: camera.target.y,
+            },
+            rotation: camera.rotation,
+            zoom: camera.zoom,
+        }
+    }
+}
+
+impl<'lua> FromLua for LuaCamera2D {
+    fn from_lua(value: LuaValue, _lua: &Lua) -> LuaResult<Self> {
+        match value {
+            LuaValue::Table(table) => {
+                let offset: LuaVector2 = table.get("offset")?;
+                let target: LuaVector2 = table.get("target")?;
+                let rotation: f32 = table.get("rotation")?;
+                let zoom: f32 = table.get("zoom")?;
+                Ok(LuaCamera2D {
+                    offset,
+                    target,
+                    rotation,
+                    zoom,
+                })
+            }
+            LuaValue::UserData(ud) => {
+                ud.borrow::<LuaCamera2D>().map(|c| *c)
+            }
+            _ => Err(LuaError::FromLuaConversionError {
+                from: value.type_name(),
+                to: "LuaCamera2D".to_string(),
+                message: Some(
+                    "expected table with offset, target, rotation, zoom fields or Camera2D userdata".to_string(),
+                ),
+            }),
+        }
+    }
+}
+
+impl LuaCamera2D {
+    pub fn new(offset: LuaVector2, target: LuaVector2, rotation: f32, zoom: f32) -> Self {
+        LuaCamera2D {
+            offset,
+            target,
+            rotation,
+            zoom,
+        }
+    }
+}
+
+impl LuaUserData for LuaCamera2D {
+    fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {
+        fields.add_field_method_get("offset", |_, this| Ok(this.offset));
+        fields.add_field_method_set("offset", |_, this, val: LuaVector2| {
+            this.offset = val;
+            Ok(())
+        });
+        fields.add_field_method_get("target", |_, this| Ok(this.target));
+        fields.add_field_method_set("target", |_, this, val: LuaVector2| {
+            this.target = val;
+            Ok(())
+        });
+        fields.add_field_method_get("rotation", |_, this| Ok(this.rotation));
+        fields.add_field_method_set("rotation", |_, this, val: f32| {
+            this.rotation = val;
+            Ok(())
+        });
+        fields.add_field_method_get("zoom", |_, this| Ok(this.zoom));
+        fields.add_field_method_set("zoom", |_, this, val: f32| {
+            this.zoom = val;
+            Ok(())
+        });
+    }
+    fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
+        methods.add_method("__eq", |_, this, other: LuaCamera2D| Ok(*this == other));
     }
 }
 
@@ -1508,6 +1646,13 @@ pub fn rect<'lua>(
     (x, y, width, height): (f32, f32, f32, f32),
 ) -> LuaResult<LuaRectangle> {
     Ok(LuaRectangle::new(x, y, width, height))
+}
+
+pub fn camera2d<'lua>(
+    _lua: &Lua,
+    (offset, target, rotation, zoom): (LuaVector2, LuaVector2, f32, f32),
+) -> LuaResult<LuaCamera2D> {
+    Ok(LuaCamera2D::new(offset, target, rotation, zoom))
 }
 
 pub fn gesture<'lua>(_lua: &Lua, _gesture: String) -> LuaResult<LuaGesture> {
@@ -1700,11 +1845,13 @@ fn raylib_lua(lua: &Lua) -> LuaResult<LuaTable> {
         lua.create_function(check_collision_point_rec)?,
     )?;
     exports.set("fade", lua.create_function(fade)?)?;
+    exports.set("get_random_value", lua.create_function(get_random_value)?)?;
 
     // Helper functions (also available in rlm_lua for compatibility)
     exports.set("vec2", lua.create_function(vector2)?)?;
     exports.set("vec3", lua.create_function(vector3)?)?;
     exports.set("rect", lua.create_function(rect)?)?;
+    exports.set("camera2d", lua.create_function(camera2d)?)?;
 
     // Register color constants
     register_colors(lua, &exports)?;
@@ -1735,6 +1882,7 @@ fn rlm_lua(lua: &Lua) -> LuaResult<LuaTable> {
     exports.set("vec2", lua.create_function(vector2)?)?;
     exports.set("vec3", lua.create_function(vector3)?)?;
     exports.set("rect", lua.create_function(rect)?)?;
+    exports.set("camera2d", lua.create_function(camera2d)?)?;
 
     // Version info
     exports.set("_VERSION", "0.1.0")?;

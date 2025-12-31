@@ -1,0 +1,8 @@
+{
+  "languages": {
+    "C": {
+      "enable_language_server": false,
+      "format_on_save": "off"
+    }
+  }
+}
