@@ -63,7 +63,7 @@ while not window:should_close() do
 
     if window:get_touch_point_count() > 0 or
         (window:get_touch_point_count() == 0 and window:is_mouse_button_down("LEFT")) then
-        for i = 1, PadButton.Max, 1 do
+        for i = 1, PadButton.Max - 1, 1 do
             local dist_x = math.abs(button_positions[i].x - input_position.x)
             local dist_y = math.abs(button_positions[i].y - input_position.y)
 
@@ -97,7 +97,7 @@ while not window:should_close() do
             return value_if_false
         end
     end
-    for i = 1, PadButton.Max do
+    for i = 1, PadButton.Max - 1 do
         window:draw_circle_v(button_positions[i], button_radius, ternary(i == pressed_button, rlc.DARKGRAY, rlc.BLACK))
 
         window:draw_text(button_labels[i], button_positions[i].x - 7, button_positions[i].y - 8,
